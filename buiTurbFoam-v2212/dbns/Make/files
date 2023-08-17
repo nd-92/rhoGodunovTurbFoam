@@ -1,0 +1,9 @@
+dbnsFlux/buiFlux/buiFlux.C
+dbnsFlux/slauFlux/slauFlux.C
+dbnsFlux/slau2Flux/slau2Flux.C
+
+basicNumericFlux/basicNumericFlux.C
+basicNumericFlux/newBasicNumericFlux.C
+numericFlux/numericFluxes.C
+
+LIB = $(FOAM_USER_LIBBIN)/libdbns
