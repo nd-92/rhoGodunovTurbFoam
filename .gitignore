@@ -1,3 +1,6 @@
 buiTurbFoam-v2212/buiTurbFoam/lnInclude
+buiTurbFoam-v2212/buiTurbFoam/Make/linux*/
 buiTurbFoam-v2212/dbns/lnInclude
+buiTurbFoam-v2212/dbns/Make/linux*/
 sigmaModel-v2212/lnInclude
+sigmaModel-v2212/Make/linux*/
