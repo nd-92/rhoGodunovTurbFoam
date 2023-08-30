@@ -1,5 +1,5 @@
-Info << "Reading thermophysical properties\n"
-     << endl;
+// Thermo fields
+Info << "Reading thermophysical properties" << endl;
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
 psiThermo &thermo = pThermo();
 thermo.validate(args.executable(), "h");
@@ -7,18 +7,8 @@ volScalarField &he = thermo.he();
 volScalarField &p = thermo.p();
 volScalarField &T = thermo.T();
 
-volScalarField rho(
-    IOobject(
-        "rho",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE),
-    thermo.rho());
-
-Info << "Reading fields U, rho * U, rho * E\n"
-     << endl;
-
+// Momentum fields
+Info << "Reading fields U, rho * U, rho * E" << endl;
 volVectorField U(
     IOobject(
         "U",
@@ -27,6 +17,14 @@ volVectorField U(
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE),
     mesh);
+volScalarField rho(
+    IOobject(
+        "rho",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE),
+    thermo.rho());
 volVectorField rhoU(
     IOobject(
         "rhoU",
@@ -44,6 +42,7 @@ volScalarField rhoE(
         IOobject::NO_WRITE),
     rho *(he + 0.5 * magSqr(U)));
 
+// Upwinding factor
 Info << "Reading field upwindingFactor" << endl;
 const volScalarField upwindingFactor(
     IOobject(
@@ -66,6 +65,7 @@ const surfaceScalarField buiEps(
         IOobject::NO_WRITE),
     fvc::interpolate(upwindingFactor));
 
+// Numeric flux
 autoPtr<basicNumericFlux> dbnsFluxPtr = basicNumericFlux::New(
     p,
     U,
@@ -73,9 +73,9 @@ autoPtr<basicNumericFlux> dbnsFluxPtr = basicNumericFlux::New(
     buiEps,
     thermo);
 basicNumericFlux &dbnsFlux = dbnsFluxPtr();
-
 const surfaceScalarField &phi = dbnsFlux.rhoFlux();
 
+// Turbulence fields
 Info << "Creating turbulence model" << endl;
 autoPtr<compressible::turbulenceModel> turbulence(
     compressible::turbulenceModel::New(
@@ -83,15 +83,12 @@ autoPtr<compressible::turbulenceModel> turbulence(
         U,
         phi,
         thermo));
-
 volScalarField muEff(
     "muEff",
     turbulence->muEff());
-
 volTensorField tauMC(
     "tauMC",
     muEff *dev2(Foam::T(fvc::grad(U))));
-
 surfaceScalarField sigmaDotU(
     "sigmaDotU",
     (fvc::interpolate(muEff) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), tauMC)) & fvc::interpolate(U));
@@ -135,5 +132,6 @@ const volScalarField acousticBlending(
         dimless,
         1));
 
+// Courant number
 scalar CoNum = 0.0;
 scalar meanCoNum = 0.0;

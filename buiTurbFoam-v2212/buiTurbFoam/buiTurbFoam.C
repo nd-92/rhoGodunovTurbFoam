@@ -25,8 +25,9 @@ Application
     buiTurbFoam
 
 Description
-    Density-based compressible flow solver based on the Roe flux difference
-    splitting scheme of Bui with absorbing sponge zones
+    Density-based shock-capturing compressible flow solver based on the Roe
+    flux difference splitting scheme of Bui with absorbing sponge zones
+    and explicitly bounded fields
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 #include "createTimeControls.H"
 #include "readFieldBounds.H"
 
-    Info << "\nStarting time loop" << endl;
+    Info << "Starting time loop" << endl;
 
     while (runTime.run())
     {
@@ -102,7 +103,8 @@ int main(int argc, char *argv[])
         runTime.printExecutionTime(Info);
     }
 
-    Info << "End \n";
+    Info << "\nEnd\n"
+         << endl;
 
     return 0;
 }
