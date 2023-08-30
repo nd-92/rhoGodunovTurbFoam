@@ -10,7 +10,7 @@ const dimensionedScalar TMin("TMin", T.dimensions(), readScalar(mesh.solutionDic
 Info << "TMin = " << TMin.value() << endl;
 
 // Enthalpy bounds
-const dimensionedScalar heMin("heMin", min(thermo.Cp()) * TMin);
+const dimensionedScalar heMin("heMin", min(thermo.he((0 * thermo.p()) + pMin, (0 * thermo.T()) + TMin)));
 Info << "heMin = " << heMin.value() << endl;
 
 // Density bounds
