@@ -43,6 +43,7 @@ Description
 #include "pointMesh.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
+#include "bound.H"
 
 int main(int argc, char *argv[])
 {
@@ -52,9 +53,9 @@ int main(int argc, char *argv[])
 #include "createMesh.H"
 #include "createFields.H"
 #include "createTimeControls.H"
+#include "readFieldBounds.H"
 
-    Info << "\nStarting time loop\n"
-         << endl;
+    Info << "\nStarting time loop" << endl;
 
     while (runTime.run())
     {
@@ -78,13 +79,20 @@ int main(int argc, char *argv[])
             tauMC = muEff * dev2(Foam::T(fvc::grad(U)));
             solve(1.0 / beta[i] * fvm::ddt(rhoU) + fvc::div(dbnsFlux.rhoUFlux()) - fvc::laplacian(muEff, U) - fvc::div(tauMC));
             sigmaDotU = (fvc::interpolate(muEff) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), tauMC)) & fvc::interpolate(U);
-            solve(1.0 / beta[i] * fvm::ddt(rhoE) + fvc::div(dbnsFlux.rhoEFlux()) - fvc::div(sigmaDotU) - fvc::laplacian(turbulence->alphaEff(), e));
-            U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
-            thermo.rho() = (thermo.rho() * acousticBlending) - (rho_inf * (acousticBlending - 1));
-            thermo.p() = (thermo.p() * acousticBlending) - (p_inf * (acousticBlending - 1));
-            thermo.T() = (thermo.T() * acousticBlending) - (T_inf * (acousticBlending - 1));
+            solve(1.0 / beta[i] * fvm::ddt(rhoE) + fvc::div(dbnsFlux.rhoEFlux()) - fvc::div(sigmaDotU) - fvc::laplacian(turbulence->alphaEff(), he));
+
+            // Update fields to new time step
 #include "updateFields.H"
         }
+
+        // Apply acoustic blending
+        U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
+        thermo.rho() = (thermo.rho() * acousticBlending) - (rho_inf * (acousticBlending - 1));
+        thermo.p() = (thermo.p() * acousticBlending) - (p_inf * (acousticBlending - 1));
+        thermo.T() = (thermo.T() * acousticBlending) - (T_inf * (acousticBlending - 1));
+        rho = thermo.rho();
+        p = thermo.p();
+        T = thermo.T();
 
         // Correct turbulence fields
         turbulence->correct();

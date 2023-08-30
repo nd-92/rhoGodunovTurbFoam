@@ -1,17 +1,19 @@
 // Read field bounds
-dictionary fieldBounds = mesh.solutionDict().subDict("fieldBounds");
+Info << "Reading field bounds\n"
+     << endl;
 
 // Pressure bounds
-dimensionedScalar pMin("pMin", p.dimensions(), SMALL);
-dimensionedScalar pMax("pMax", p.dimensions(), 1e10);
-fieldBounds.lookup(p.name()) >> pMin.value() >> pMax.value();
+const dimensionedScalar pMin("pMin", p.dimensions(), readScalar(mesh.solutionDict().subDict("fieldBounds").lookup("pMin")));
+Info << "\n pMin = " << pMin.value() << endl;
 
 // Temperature bounds
-dimensionedScalar TMin("TMin", T.dimensions(), SMALL);
-dimensionedScalar TMax("TMax", T.dimensions(), 1e10);
-fieldBounds.lookup(T.name()) >> TMin.value() >> TMax.value();
+const dimensionedScalar TMin("TMin", T.dimensions(), readScalar(mesh.solutionDict().subDict("fieldBounds").lookup("TMin")));
+Info << "\n TMin = " << TMin.value() << endl;
+
+// Enthalpy bounds
+const dimensionedScalar heMin("heMin", min(thermo.Cp()) * TMin);
+Info << "\n heMin = " << heMin.value() << endl;
 
 // Density bounds
-dimensionedScalar rhoMin("rhoMin", rho.dimensions(), SMALL);
-dimensionedScalar rhoMax("rhoMax", rho.dimensions(), 1e10);
-fieldBounds.lookup(rho.name()) >> rhoMin.value() >> rhoMax.value();
+const dimensionedScalar rhoMin("rhoMin", rho.dimensions(), readScalar(mesh.solutionDict().subDict("fieldBounds").lookup("rhoMin")));
+Info << "\n rhoMin = " << rhoMin.value() << endl;

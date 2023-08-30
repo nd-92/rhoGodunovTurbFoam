@@ -35,7 +35,7 @@ Info << "Reading thermophysical properties\n"
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
 psiThermo &thermo = pThermo();
 thermo.validate(args.executable(), "h");
-volScalarField &e = thermo.he();
+volScalarField &he = thermo.he();
 volScalarField &p = thermo.p();
 volScalarField &T = thermo.T();
 
@@ -74,10 +74,9 @@ volScalarField rhoE(
         mesh,
         IOobject::NO_READ,
         IOobject::NO_WRITE),
-    rho *(e + 0.5 * magSqr(U)));
+    rho *(he + 0.5 * magSqr(U)));
 
-Info << "Reading field upwindingFactor\n"
-     << endl;
+Info << "Reading field upwindingFactor" << endl;
 const volScalarField upwindingFactor(
     IOobject(
         "upwindingFactor",
@@ -109,8 +108,7 @@ basicNumericFlux &dbnsFlux = dbnsFluxPtr();
 
 const surfaceScalarField &phi = dbnsFlux.rhoFlux();
 
-Info << "Creating turbulence model\n"
-     << endl;
+Info << "Creating turbulence model" << endl;
 autoPtr<compressible::turbulenceModel> turbulence(
     compressible::turbulenceModel::New(
         rho,

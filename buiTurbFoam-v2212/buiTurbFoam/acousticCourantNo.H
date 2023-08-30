@@ -1,8 +1,7 @@
 scalar CoNum = 0.0;
 scalar meanCoNum = 0.0;
 
-volScalarField c = Foam::sqrt(thermo.gamma() * thermo.p() / thermo.rho());
-surfaceScalarField cSf(fvc::interpolate(c) * mesh.magSf());
+surfaceScalarField cSf(fvc::interpolate(Foam::sqrt(thermo.gamma() * thermo.p() / thermo.rho())) * mesh.magSf());
 surfaceScalarField phiv((fvc::interpolate(rhoU) / fvc::interpolate(rho)) & mesh.Sf());
 surfaceScalarField amaxSf(0.5 * (mag(phiv) + cSf));
 

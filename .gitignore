@@ -1,4 +1,4 @@
-buiTurbFoam-v2212/buiTurbFoam/lnInclude
+buiTurbFoam-v2212/buiTurbFoam/lnInclude -f
 buiTurbFoam-v2212/buiTurbFoam/Make/linux*/
 buiTurbFoam-v2212/dbns/lnInclude
 buiTurbFoam-v2212/dbns/Make/linux*/
