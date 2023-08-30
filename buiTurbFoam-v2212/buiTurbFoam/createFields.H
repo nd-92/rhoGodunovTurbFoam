@@ -1,35 +1,3 @@
-// Constants for blending
-const dimensionedScalar T_inf(
-    "T_inf",
-    dimensionSet(0, 0, 0, 1, 0, 0, 0),
-    readScalar(runTime.controlDict().lookup("T_inf")));
-const dimensionedScalar p_inf(
-    "p_inf",
-    dimensionSet(1, -1, -2, 0, 0, 0, 0),
-    readScalar(runTime.controlDict().lookup("p_inf")));
-const dimensionedScalar rho_inf(
-    "rho_inf",
-    dimensionSet(1, -3, 0, 0, 0, 0, 0),
-    readScalar(runTime.controlDict().lookup("rho_inf")));
-const dimensionedVector U_inf(
-    "U_inf",
-    dimensionSet(0, 1, -1, 0, 0, 0, 0),
-    vector(runTime.controlDict().lookup("U_inf")));
-
-// Blending coefficient
-const volScalarField acousticBlending(
-    IOobject(
-        "acousticBlending",
-        runTime.timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE),
-    mesh,
-    dimensionedScalar(
-        "one",
-        dimless,
-        1));
-
 Info << "Reading thermophysical properties\n"
      << endl;
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
@@ -134,3 +102,35 @@ beta[0] = 0.1100;
 beta[1] = 0.2766;
 beta[2] = 0.5000;
 beta[3] = 1.0000;
+
+// Constants for blending
+const dimensionedScalar T_inf(
+    "T_inf",
+    T.dimensions(),
+    readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("T")));
+const dimensionedScalar p_inf(
+    "p_inf",
+    p.dimensions(),
+    readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("p")));
+const dimensionedScalar rho_inf(
+    "rho_inf",
+    rho.dimensions(),
+    readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("rho")));
+const dimensionedVector U_inf(
+    "U_inf",
+    U.dimensions(),
+    vector(mesh.solutionDict().subDict("freestreamProperties").lookup("U")));
+
+// Blending coefficient
+const volScalarField acousticBlending(
+    IOobject(
+        "acousticBlending",
+        runTime.timeName(),
+        mesh,
+        IOobject::READ_IF_PRESENT,
+        IOobject::AUTO_WRITE),
+    mesh,
+    dimensionedScalar(
+        "one",
+        dimless,
+        1));
