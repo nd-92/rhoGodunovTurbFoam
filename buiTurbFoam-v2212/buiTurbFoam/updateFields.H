@@ -3,18 +3,18 @@ U.ref() = rhoU() / rho();
 U.correctBoundaryConditions();
 rhoU.boundaryFieldRef() == rho.boundaryField() * U.boundaryField();
 
+// Bound density
+rho = bound(rho, rhoMin);
+
+// Bound temperature
+T = bound(T, TMin);
+
 // Calculate enthalpy
 he.ref() = rhoE / rho - 0.5 * magSqr(U);
 he.correctBoundaryConditions();
 
 // Bound enthalpy
 he = bound(he, heMin);
-
-// Bound density
-rho = bound(rho, rhoMin);
-
-// Bound temperature
-T = bound(T, TMin);
 
 // Correct thermodynamics
 thermo.correct();
