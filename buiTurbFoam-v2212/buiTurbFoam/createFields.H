@@ -134,3 +134,6 @@ const volScalarField acousticBlending(
         "one",
         dimless,
         1));
+
+scalar CoNum = 0.0;
+scalar meanCoNum = 0.0;
