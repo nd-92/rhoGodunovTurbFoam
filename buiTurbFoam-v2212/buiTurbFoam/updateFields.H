@@ -14,7 +14,7 @@ he.ref() = rhoE / rho - 0.5 * magSqr(U);
 he.correctBoundaryConditions();
 
 // Bound enthalpy
-he = bound(he, heMin);
+// he = bound(he, heMin);
 
 // Correct thermodynamics
 thermo.correct();
@@ -26,4 +26,4 @@ p.correctBoundaryConditions();
 rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
 
 // Bound pressure
-p = bound(p, pMin);
+// p = bound(p, pMin);
