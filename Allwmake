@@ -1,10 +1,4 @@
-#cd sigmaModel-v2212/
-#wclean
-#wmake
-cd buiTurbFoam-v2212/dbns/
-wclean
-wmake
-cd ../buiTurbFoam/
-wclean
-wmake
-cd ../../
+wclean dbns
+wmake dbns
+wclean buiTurbFoam
+wmake buiTurbFoam
