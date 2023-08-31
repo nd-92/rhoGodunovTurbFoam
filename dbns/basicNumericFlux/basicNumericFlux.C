@@ -33,19 +33,17 @@ namespace Foam
     defineRunTimeSelectionTable(basicNumericFlux, state);
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicNumericFlux::basicNumericFlux(const fvMesh& mesh)
-:
-    mesh_(mesh)
-{}
-
+Foam::basicNumericFlux::basicNumericFlux(const fvMesh &mesh)
+    : mesh_(mesh)
+{
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::basicNumericFlux::~basicNumericFlux()
-{}
-
+{
+}
 
 // ************************************************************************* //

@@ -49,116 +49,97 @@ SourceFiles
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                         Class basicNumericFlux Declaration
-\*---------------------------------------------------------------------------*/
+    /*---------------------------------------------------------------------------*\
+                             Class basicNumericFlux Declaration
+    \*---------------------------------------------------------------------------*/
 
-class basicNumericFlux
-{
-    // Private data
+    class basicNumericFlux
+    {
+        // Private data
 
         //- Reference to mesh
-        const fvMesh& mesh_;
+        const fvMesh &mesh_;
 
-
-protected:
-
-    // Protected member functions
+    protected:
+        // Protected member functions
 
         //- Construct as copy (not implemented)
-        basicNumericFlux(const basicNumericFlux&);
+        basicNumericFlux(const basicNumericFlux &);
 
+    public:
+        //- Runtime type information
+        TypeName("basicNumericFlux");
 
-public:
-
-    //- Runtime type information
-    TypeName("basicNumericFlux");
-
-
-    //- Declare run-time constructor selection table
+        //- Declare run-time constructor selection table
 
 #ifndef SWIG
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        basicNumericFlux,
-        state,
-        (
-            const volScalarField& p,
-            const volVectorField& U,
-            const volScalarField& T,
-            const surfaceScalarField& buiEps,
-            basicThermo& thermo
-        ),
-        (p, U, T, buiEps, thermo)
-    );
+        declareRunTimeSelectionTable(
+            autoPtr,
+            basicNumericFlux,
+            state,
+            (
+                const volScalarField &p,
+                const volVectorField &U,
+                const volScalarField &T,
+                const surfaceScalarField &buiEps,
+                basicThermo &thermo),
+            (p, U, T, buiEps, thermo));
 #endif
 
-
-    // Constructors
+        // Constructors
 
         //- Construct from components
-        basicNumericFlux
-        (
-            const fvMesh& mesh
-        );
+        basicNumericFlux(
+            const fvMesh &mesh);
 
+        //- Selector
+        static autoPtr<basicNumericFlux> New(
+            const volScalarField &p,
+            const volVectorField &U,
+            const volScalarField &T,
+            const surfaceScalarField &buiEps,
+            basicThermo &thermo);
 
-    //- Selector
-    static autoPtr<basicNumericFlux> New
-    (
-        const volScalarField& p,
-        const volVectorField& U,
-        const volScalarField& T,
-        const surfaceScalarField& buiEps,
-        basicThermo& thermo
-    );
+        //- Destructor
+        virtual ~basicNumericFlux();
 
-
-    //- Destructor
-    virtual ~basicNumericFlux();
-
-
-    // Member functions
+        // Member functions
 
         //- Return mesh reference
-        const fvMesh& mesh() const
+        const fvMesh &mesh() const
         {
             return mesh_;
         }
 
         // Return fluxes
 
-            //- Return density flux
-            virtual const surfaceScalarField& rhoFlux() const = 0;
+        //- Return density flux
+        virtual const surfaceScalarField &rhoFlux() const = 0;
 
-            //- Return velocity flux
-            virtual const surfaceVectorField& rhoUFlux() const = 0;
+        //- Return velocity flux
+        virtual const surfaceVectorField &rhoUFlux() const = 0;
 
-            //- Return energy flux
-            virtual const surfaceScalarField& rhoEFlux() const = 0;
+        //- Return energy flux
+        virtual const surfaceScalarField &rhoEFlux() const = 0;
 
+        // Return residuals
 
-       // Return residuals
+        //- Return density equation residual
+        virtual tmp<scalarField> rhoResidual() const = 0;
 
-            //- Return density equation residual
-            virtual tmp<scalarField> rhoResidual() const = 0;
+        //- Return momentum equation flux
+        virtual tmp<vectorField> rhoUResidual() const = 0;
 
-            //- Return momentum equation flux
-            virtual tmp<vectorField> rhoUResidual() const = 0;
-
-            //- Return energy equation flux
-            virtual tmp<scalarField> rhoEResidual() const = 0;
-
+        //- Return energy equation flux
+        virtual tmp<scalarField> rhoEResidual() const = 0;
 
         // Update fluxes based on current state
 
-            //- Compute flux
-            virtual void computeFlux() = 0;
-};
+        //- Compute flux
+        virtual void computeFlux() = 0;
+    };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
