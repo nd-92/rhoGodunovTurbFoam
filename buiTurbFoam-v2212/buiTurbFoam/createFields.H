@@ -8,7 +8,7 @@ volScalarField &p = thermo.p();
 volScalarField &T = thermo.T();
 
 // Momentum fields
-Info << "Reading fields U, rho * U, rho * E" << endl;
+Info << "Reading fields rho, U, rho * U, rho * E" << endl;
 volVectorField U(
     IOobject(
         "U",
