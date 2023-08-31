@@ -30,6 +30,7 @@ License
 #include "firstOrderLimiter.H"
 #include "BarthJespersenLimiter.H"
 #include "VenkatakrishnanLimiter.H"
+#include "WangLimiter.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,10 +39,11 @@ namespace Foam
 
   /* * * * * * * * * * * * * * * Private Static Data * * * * * * * * * * * * * */
 
-#define makeBasicNumericFluxForAllLimiters(Flux)     \
-  makeBasicNumericFlux(Flux, firstOrderLimiter);     \
-  makeBasicNumericFlux(Flux, BarthJespersenLimiter); \
-  makeBasicNumericFlux(Flux, VenkatakrishnanLimiter);
+#define makeBasicNumericFluxForAllLimiters(Flux)      \
+  makeBasicNumericFlux(Flux, firstOrderLimiter);      \
+  makeBasicNumericFlux(Flux, BarthJespersenLimiter);  \
+  makeBasicNumericFlux(Flux, VenkatakrishnanLimiter); \
+  makeBasicNumericFlux(Flux, WangLimiter);
 
   makeBasicNumericFluxForAllLimiters(buiFlux);
   makeBasicNumericFluxForAllLimiters(slauFlux);
