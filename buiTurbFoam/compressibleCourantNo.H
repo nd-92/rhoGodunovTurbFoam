@@ -42,13 +42,11 @@ if (mesh.nInternalFaces() || Pstream::parRun())
 {
     surfaceScalarField phiOverRho = mag(phi) / fvc::interpolate(rho);
 
-    surfaceScalarField SfUfbyDelta =
-        mesh.surfaceInterpolation::deltaCoeffs() * phiOverRho;
+    surfaceScalarField SfUfbyDelta = mesh.surfaceInterpolation::deltaCoeffs() * phiOverRho;
 
     CoNum = max(SfUfbyDelta / mesh.magSf()).value() * runTime.deltaT().value();
 
-    meanCoNum = (sum(SfUfbyDelta) / sum(mesh.magSf())).value() *
-                runTime.deltaT().value();
+    meanCoNum = (sum(SfUfbyDelta) / sum(mesh.magSf())).value() * runTime.deltaT().value();
 
     velMag = max(phiOverRho / mesh.magSf()).value();
 }
