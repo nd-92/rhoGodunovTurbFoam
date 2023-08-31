@@ -39,12 +39,22 @@ Description
 #include "firstOrderLimiter.H"
 #include "BarthJespersenLimiter.H"
 #include "VenkatakrishnanLimiter.H"
+#include "WangLimiter.H"
 #include "numericFlux.H"
 #include "buiFlux.H"
 #include "pointMesh.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
 #include "bound.H"
+
+// constexpr scalarList rk4Coeffs(scalarList beta[4])
+// {
+//     beta[0] = 0.1100;
+//     beta[1] = 0.2766;
+//     beta[2] = 0.5000;
+//     beta[3] = 1.0000;
+//     return beta;
+// }
 
 int main(int argc, char *argv[])
 {
@@ -56,13 +66,15 @@ int main(int argc, char *argv[])
 #include "createTimeControls.H"
 #include "readFieldBounds.H"
 
+    // beta = rk4Coeffs(beta);
+
     Info << "Starting time loop" << endl;
 
     while (runTime.run())
     {
 
 #include "readTimeControls.H"
-#include "acousticCourantNo.H"
+#include "compressibleCourantNo.H"
 #include "setDeltaT.H"
 
         runTime++;
@@ -75,12 +87,27 @@ int main(int argc, char *argv[])
             dbnsFlux.computeFlux();
 
             // Time integration
-            solve(1.0 / beta[i] * fvm::ddt(rho) + fvc::div(dbnsFlux.rhoFlux()));
-            muEff = turbulence->muEff();
-            tauMC = muEff * dev2(Foam::T(fvc::grad(U)));
-            solve(1.0 / beta[i] * fvm::ddt(rhoU) + fvc::div(dbnsFlux.rhoUFlux()) - fvc::laplacian(muEff, U) - fvc::div(tauMC));
-            sigmaDotU = (fvc::interpolate(muEff) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), tauMC)) & fvc::interpolate(U);
-            solve(1.0 / beta[i] * fvm::ddt(rhoE) + fvc::div(dbnsFlux.rhoEFlux()) - fvc::div(sigmaDotU) - fvc::laplacian(turbulence->alphaEff(), he));
+            // solve(1.0 / beta[i] * fvm::ddt(rho) + fvc::div(dbnsFlux.rhoFlux()));
+            // muEff = turbulence->muEff();
+            // tauMC = muEff * dev2(Foam::T(fvc::grad(U)));
+            // solve(1.0 / beta[i] * fvm::ddt(rhoU) + fvc::div(dbnsFlux.rhoUFlux()) - fvc::laplacian(muEff, U) - fvc::div(tauMC));
+            // sigmaDotU = (fvc::interpolate(muEff) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), tauMC)) & fvc::interpolate(U);
+            // solve(1.0 / beta[i] * fvm::ddt(rhoE) + fvc::div(dbnsFlux.rhoEFlux()) - fvc::div(sigmaDotU) - fvc::laplacian(turbulence->alphaEff(), he));
+
+            solve(
+                1.0 / beta[i] * fvm::ddt(rho)    //
+                + fvc::div(dbnsFlux.rhoFlux())); //
+
+            solve(
+                1.0 / beta[i] * fvm::ddt(rhoU)         //
+                + fvc::div(dbnsFlux.rhoUFlux())        //
+                + fvc::div(turbulence->devRhoReff())); //
+
+            solve(
+                1.0 / beta[i] * fvm::ddt(rhoE)                 //
+                + fvc::div(dbnsFlux.rhoEFlux())                //
+                + fvc::div(turbulence->devRhoReff() & U)       //
+                - fvc::laplacian(turbulence->alphaEff(), he)); //
 
             // Update fields to new time step
 #include "updateFields.H"

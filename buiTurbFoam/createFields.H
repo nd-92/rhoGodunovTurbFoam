@@ -83,15 +83,15 @@ autoPtr<compressible::turbulenceModel> turbulence(
         U,
         phi,
         thermo));
-volScalarField muEff(
-    "muEff",
-    turbulence->muEff());
-volTensorField tauMC(
-    "tauMC",
-    muEff *dev2(Foam::T(fvc::grad(U))));
-surfaceScalarField sigmaDotU(
-    "sigmaDotU",
-    (fvc::interpolate(muEff) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), tauMC)) & fvc::interpolate(U));
+// volScalarField muEff(
+//     "muEff",
+//     turbulence->muEff());
+// volTensorField tauMC(
+//     "tauMC",
+//     muEff *dev2(Foam::T(fvc::grad(U))));
+// surfaceScalarField sigmaDotU(
+//     "sigmaDotU",
+//     (fvc::interpolate(muEff) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), tauMC)) & fvc::interpolate(U));
 
 // Runge-Kutta coefficient
 scalarList beta(4);
@@ -135,3 +135,4 @@ const volScalarField acousticBlending(
 // Courant number
 scalar CoNum = 0.0;
 scalar meanCoNum = 0.0;
+scalar velMag = 0.0;
