@@ -47,15 +47,6 @@ Description
 #include "volPointInterpolation.H"
 #include "bound.H"
 
-// constexpr scalarList rk4Coeffs(scalarList beta[4])
-// {
-//     beta[0] = 0.1100;
-//     beta[1] = 0.2766;
-//     beta[2] = 0.5000;
-//     beta[3] = 1.0000;
-//     return beta;
-// }
-
 int main(int argc, char *argv[])
 {
 
@@ -66,74 +57,58 @@ int main(int argc, char *argv[])
 #include "createTimeControls.H"
 #include "readFieldBounds.H"
 
-    // beta = rk4Coeffs(beta);
-
     Info << "Starting time loop" << endl;
 
-    while (runTime.run())
+    if (applyDamping == true)
     {
-
-#include "readTimeControls.H"
-#include "compressibleCourantNo.H"
-#include "setDeltaT.H"
-
-        runTime++;
-        Info << "\n Time = " << runTime.value() << endl;
-
-        // Low storage Runge-Kutta time integration
-        forAll(beta, i)
+#include "dampingFields.H"
+        while (runTime.run())
         {
-            // Solve the approximate Riemann problem for this time step
-            dbnsFlux.computeFlux();
+            // Execute main solver loop
+#include "buiTurbFoam.H"
 
-            // Time integration
-            // solve(1.0 / beta[i] * fvm::ddt(rho) + fvc::div(dbnsFlux.rhoFlux()));
-            // muEff = turbulence->muEff();
-            // tauMC = muEff * dev2(Foam::T(fvc::grad(U)));
-            // solve(1.0 / beta[i] * fvm::ddt(rhoU) + fvc::div(dbnsFlux.rhoUFlux()) - fvc::laplacian(muEff, U) - fvc::div(tauMC));
-            // sigmaDotU = (fvc::interpolate(muEff) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), tauMC)) & fvc::interpolate(U);
-            // solve(1.0 / beta[i] * fvm::ddt(rhoE) + fvc::div(dbnsFlux.rhoEFlux()) - fvc::div(sigmaDotU) - fvc::laplacian(turbulence->alphaEff(), he));
+            // Apply acoustic blending
+            U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
+            thermo.rho() = (thermo.rho() * acousticBlending) - (rho_inf * (acousticBlending - 1));
+            thermo.p() = (thermo.p() * acousticBlending) - (p_inf * (acousticBlending - 1));
+            thermo.T() = (thermo.T() * acousticBlending) - (T_inf * (acousticBlending - 1));
+            rho = thermo.rho();
+            p = thermo.p();
+            T = thermo.T();
 
-            solve(
-                1.0 / beta[i] * fvm::ddt(rho)    //
-                + fvc::div(dbnsFlux.rhoFlux())); //
+            // Correct turbulence fields
+            turbulence->correct();
 
-            solve(
-                1.0 / beta[i] * fvm::ddt(rhoU)         //
-                + fvc::div(dbnsFlux.rhoUFlux())        //
-                + fvc::div(turbulence->devRhoReff())); //
-
-            solve(
-                1.0 / beta[i] * fvm::ddt(rhoE)                 //
-                + fvc::div(dbnsFlux.rhoEFlux())                //
-                + fvc::div(turbulence->devRhoReff() & U)       //
-                - fvc::laplacian(turbulence->alphaEff(), he)); //
-
-            // Update fields to new time step
-#include "updateFields.H"
+            // Write runtime output
+            runTime.write();
+            runTime.printExecutionTime(Info);
         }
 
-        // Apply acoustic blending
-        U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
-        thermo.rho() = (thermo.rho() * acousticBlending) - (rho_inf * (acousticBlending - 1));
-        thermo.p() = (thermo.p() * acousticBlending) - (p_inf * (acousticBlending - 1));
-        thermo.T() = (thermo.T() * acousticBlending) - (T_inf * (acousticBlending - 1));
-        rho = thermo.rho();
-        p = thermo.p();
-        T = thermo.T();
+        Info << "\nEnd\n"
+             << endl;
 
-        // Correct turbulence fields
-        turbulence->correct();
-
-        // Write runtime output
-        runTime.write();
-        runTime.printExecutionTime(Info);
+        return 0;
     }
+    else
+    {
+        while (runTime.run())
+        {
+            // Execute main solver loop
+#include "buiTurbFoam.H"
 
-    Info << "\nEnd\n"
-         << endl;
+            // Correct turbulence fields
+            turbulence->correct();
 
-    return 0;
+            // Write runtime output
+            runTime.write();
+            runTime.printExecutionTime(Info);
+        }
+
+        Info << "\nEnd\n"
+             << endl;
+
+        return 0;
+    }
 }
 
 // ************************************************************************* //
