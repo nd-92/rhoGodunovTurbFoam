@@ -47,6 +47,75 @@ Description
 #include "volPointInterpolation.H"
 #include "bound.H"
 
+// #include "dimensionedScalar.H"
+// #include "volFieldsFwd.H"
+// #include "volFields.H"
+// #include "fvc.H"
+
+// void boundMinMax(
+//     volScalarField &vsf,
+//     const dimensionedScalar &lowerBound,
+//     const dimensionedScalar &upperBound)
+// {
+//     const scalar minVsf = min(vsf).value();
+//     const scalar maxVsf = max(vsf).value();
+
+//     if (minVsf < lowerBound.value() || maxVsf > upperBound.value())
+//     {
+//         Info << "bounding " << vsf.name()
+//              << ", min: " << minVsf
+//              << " max: " << maxVsf
+//              << " average: " << gAverage(vsf.internalField())
+//              << endl;
+//     }
+
+//     // if (minVsf < lowerBound.value())
+//     // {
+//     //     vsf.primitiveFieldRef() = max(
+//     //         max(
+//     //             vsf.primitiveField(),
+//     //             fvc::average(max(vsf, lowerBound))().primitiveField() * pos0(lowerBound.value() - vsf.primitiveField())),
+//     //         lowerBound.value());
+//     //     Info << "new max: " << gMax(vsf.internalField()) << endl;
+//     //     vsf.boundaryFieldRef() = max(vsf.boundaryField(), lowerBound.value());
+//     // }
+
+//     // if (maxVsf > upperBound.value())
+//     // {
+//     //     vsf.primitiveFieldRef() = min(
+//     //         min(
+//     //             vsf.primitiveField(),
+//     //             fvc::average(min(vsf, upperBound))().primitiveField() * neg(upperBound.value() - vsf.primitiveField())),
+//     //         upperBound.value());
+//     //     Info << "new max: " << gMax(vsf.internalField()) << endl;
+//     //     vsf.boundaryFieldRef() = min(vsf.boundaryField(), lowerBound.value());
+//     // }
+
+//     if (minVsf < lowerBound.value())
+//     {
+//         vsf.primitiveFieldRef() = max(
+//             max(
+//                 vsf.primitiveField(),
+//                 fvc::average(max(vsf, lowerBound))().primitiveField() * pos0(lowerBound.value() - vsf.primitiveField())),
+//             lowerBound.value());
+//         Info << "new max: " << gMax(vsf.internalField()) << endl;
+//         vsf.boundaryFieldRef() = max(vsf.boundaryField(), lowerBound.value());
+//     }
+
+//     if (maxVsf > upperBound.value())
+//     {
+//         vsf.primitiveFieldRef() = min(
+//             min(
+//                 vsf.primitiveField(),
+//                 fvc::average(min(vsf, upperBound))().primitiveField() * neg(upperBound.value() - vsf.primitiveField())),
+//             upperBound.value());
+//         Info << "new max: " << gMax(vsf.internalField()) << endl;
+//         vsf.boundaryFieldRef() = min(vsf.boundaryField(), lowerBound.value());
+//     }
+
+//     // return vsf;
+// }
+
 int main(int argc, char *argv[])
 {
 
@@ -55,7 +124,7 @@ int main(int argc, char *argv[])
 #include "createMesh.H"
 #include "createFields.H"
 #include "createTimeControls.H"
-#include "readFieldBounds.H"
+    // #include "readFieldBounds.H"
 
     Info << "Starting time loop" << endl;
 
@@ -66,6 +135,12 @@ int main(int argc, char *argv[])
         {
             // Execute main solver loop
 #include "buiTurbFoam.H"
+
+            // Apply field bounds
+            // boundMinMax(he, heMin, heMax);
+            // boundMinMax(rho, rhoMin, rhoMax);
+            // boundMinMax(T, TMin, TMax);
+            // boundMinMax(p, pMin, pMax);
 
             // Apply acoustic blending
             U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));

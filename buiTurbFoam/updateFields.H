@@ -39,7 +39,8 @@
 
     // h = rhoE/rho - 0.5*magSqr(U) + p/rho;
     // Alternative formulation, Felipe Alves Portela TU Delft
-    he = thermo.Cp() / thermo.Cv() * (rhoE / rho - 0.5 * magSqr(U));
+    // he = thermo.Cp() / thermo.Cv() * (rhoE / rho - 0.5 * magSqr(U));
+    he = thermo.gamma() * (rhoE / rho - 0.5 * magSqr(U));
     he.correctBoundaryConditions();
 
     // Bound enthalpy
@@ -49,18 +50,18 @@
     // dimensionedScalar hMin = CpMin * TMin;
     // dimensionedScalar hMax = CpMax * TMax;
 
-    he = bound(he, heMin);
+    // boundMinMax(he, heMin, heMax);
 
     // Correct thermodynamics
     thermo.correct();
 
     // Bound density
-    rho = bound(rho, rhoMin);
+    // boundMinMax(rho, rhoMin, rhoMax);
 
     // Compute p from rho
     p = rho * (thermo.Cp() - thermo.Cv()) * T;
     p.correctBoundaryConditions();
 
     // Bound pressure
-    p = bound(p, pMin);
+    // boundMinMax(p, pMin, pMax);
 }
