@@ -24,7 +24,7 @@ forAll(beta, i)
         1.0 / beta[i] * fvm::ddt(rhoE)                                                                                                                                                                //
         + fvc::div(dbnsFlux.rhoEFlux())                                                                                                                                                               //
         - fvc::div((fvc::interpolate(turbulence->muEff()) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))) & fvc::interpolate(U)) //
-        - fvc::laplacian(turbulence->alphaEff(), he));                                                                                                                                                //
+        - fvc::laplacian(turbulence->alphaEff(), e));                                                                                                                                                 //
 
     // Update fields to new time step
 #include "updateFields.H"

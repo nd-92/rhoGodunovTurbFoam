@@ -1,4 +1,5 @@
+#!/bin/sh
 wclean dbns
-wmake dbns
 wclean buiTurbFoam
+wmake dbns
 wmake buiTurbFoam

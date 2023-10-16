@@ -1,4 +1,3 @@
-buiTurbFoam/lnInclude
-buiTurbFoam/Make/*/
-dbns/lnInclude
-dbns/Make/*/
+*/lnInclude
+*/Make/*/
+.vscode/
