@@ -1,8 +1,11 @@
 // Thermo fields
 Info << "Reading thermophysical properties" << endl;
+// autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
+// psiThermo &thermo = pThermo();
+// thermo.validate(args.executable(), "e");
+// volScalarField &e = thermo.e();
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
 psiThermo &thermo = pThermo();
-thermo.validate(args.executable(), "e");
 volScalarField &e = thermo.he();
 volScalarField &p = thermo.p();
 volScalarField &T = thermo.T();
