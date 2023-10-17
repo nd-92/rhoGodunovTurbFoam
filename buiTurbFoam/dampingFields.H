@@ -26,3 +26,10 @@ const volScalarField acousticBlending(
         "one",
         dimless,
         1));
+
+// Initially damp fields
+U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
+rho = (rho * acousticBlending) - (rho_inf * (acousticBlending - 1));
+rhoU = (rhoU * acousticBlending) - (rho_inf * U_inf * (acousticBlending - 1));
+T = (T * acousticBlending) - (T_inf * (acousticBlending - 1));
+p = (p * acousticBlending) - (p_inf * (acousticBlending - 1));

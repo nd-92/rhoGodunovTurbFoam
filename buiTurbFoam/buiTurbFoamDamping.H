@@ -27,6 +27,7 @@ forAll(beta, i)
         - fvc::laplacian(turbulence->alphaEff(), e));                                                                                                                                                 //
 
     // Compute U
+    // Applying damping here may help stability
     rho = (rho * acousticBlending) - (rho_inf * (acousticBlending - 1));
     rhoU = (rhoU * acousticBlending) - (rho_inf * U_inf * (acousticBlending - 1));
     U = rhoU / rho;
@@ -39,10 +40,12 @@ forAll(beta, i)
 
     // Correct thermodynamics
     thermo.correct();
+    // Applying damping here may help stability
     T = (T * acousticBlending) - (T_inf * (acousticBlending - 1));
     rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + 0.5 * magSqr(U.boundaryField()));
 
     // Compute p from rho
+    // Applying damping here may help stability
     p.ref() = ((rho / thermo.psi()) * acousticBlending) - (p_inf * (acousticBlending - 1));
     p.correctBoundaryConditions();
     rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
