@@ -64,16 +64,7 @@ int main(int argc, char *argv[])
         while (runTime.run())
         {
             // Execute main solver loop
-#include "buiTurbFoam.H"
-
-            // Apply acoustic blending
-            U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
-            thermo.rho() = (thermo.rho() * acousticBlending) - (rho_inf * (acousticBlending - 1));
-            thermo.p() = (thermo.p() * acousticBlending) - (p_inf * (acousticBlending - 1));
-            thermo.T() = (thermo.T() * acousticBlending) - (T_inf * (acousticBlending - 1));
-            rho = thermo.rho();
-            p = thermo.p();
-            T = thermo.T();
+#include "buiTurbFoamDamping.H"
 
             // Correct turbulence fields
             turbulence->correct();
