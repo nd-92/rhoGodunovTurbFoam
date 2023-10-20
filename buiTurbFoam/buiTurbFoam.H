@@ -43,4 +43,7 @@ forAll(beta, i)
     p.ref() = rho() / thermo.psi();
     p.correctBoundaryConditions();
     rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
+
+    // Correct turbulence fields
+    turbulence->correct();
 }

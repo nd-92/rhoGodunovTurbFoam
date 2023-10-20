@@ -49,4 +49,7 @@ forAll(beta, i)
     p.ref() = ((rho / thermo.psi()) * acousticBlending) - (p_inf * (acousticBlending - 1));
     p.correctBoundaryConditions();
     rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
+
+    // Correct turbulence fields
+    turbulence->correct();
 }

@@ -66,9 +66,6 @@ int main(int argc, char *argv[])
             // Execute main solver loop
 #include "buiTurbFoamDamping.H"
 
-            // Correct turbulence fields
-            turbulence->correct();
-
             // Write runtime output
             runTime.write();
             runTime.printExecutionTime(Info);
@@ -84,9 +81,6 @@ int main(int argc, char *argv[])
         {
             // Execute main solver loop
 #include "buiTurbFoam.H"
-
-            // Correct turbulence fields
-            turbulence->correct();
 
             // Write runtime output
             runTime.write();
