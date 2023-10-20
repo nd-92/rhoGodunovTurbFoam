@@ -3,7 +3,7 @@
 #include "setDeltaT.H"
 
 runTime++;
-Info << "\n Time = " << runTime.value() << endl;
+Info << "\nTime = " << runTime.value() << endl;
 
 // Low storage Runge-Kutta time integration
 forAll(beta, i)
