@@ -84,11 +84,7 @@ autoPtr<compressible::turbulenceModel> turbulence(
         thermo));
 
 // Runge-Kutta coefficient
-scalarList beta(4);
-beta[0] = 0.1100;
-beta[1] = 0.2766;
-beta[2] = 0.5000;
-beta[3] = 1.0000;
+constexpr double betaReciprocal[4] = {1 / 0.1100, 1 / 0.2766, 2.000, 1.000};
 
 const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
 
