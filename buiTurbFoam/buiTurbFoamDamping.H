@@ -27,16 +27,21 @@ for (uint8_t i = 0; i < 4; i++)
         - fvc::div((fvc::interpolate(turbulence->muEff()) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))) & fvc::interpolate(U)) //
         - fvc::laplacian(turbulence->alphaEff(), e));                                                                                                                                                 //
 
-    // Compute U
+    // Apply damping to conservative terms
     rho = (rho * acousticBlending) - (rho_inf * (acousticBlending - 1));
     rhoU = (rhoU * acousticBlending) - (rho_inf * U_inf * (acousticBlending - 1));
+    rhoE = (rhoE * acousticBlending) - (rho_inf * e_inf * (acousticBlending - 1));
+
+    // Compute U
     U = rhoU / rho;
     U.correctBoundaryConditions();
     rhoU.boundaryFieldRef() == rho.boundaryField() * U.boundaryField();
+    U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
 
     // Calculate internal energy
     e = ((rhoE / rho) - (0.5 * magSqr(U)));
     e.correctBoundaryConditions();
+    e = (e * acousticBlending) - (e_inf * (acousticBlending - 1));
 
     // Correct thermodynamics
     thermo.correct();

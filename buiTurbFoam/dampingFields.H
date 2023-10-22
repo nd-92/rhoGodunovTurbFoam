@@ -1,3 +1,4 @@
+// Get reference values for damping
 const dimensionedScalar T_inf(
     "T_inf",
     T.dimensions(),
@@ -14,6 +15,11 @@ const dimensionedVector U_inf(
     "U_inf",
     U.dimensions(),
     vector(mesh.solutionDict().subDict("freestreamProperties").lookup("U")));
+const dimensionedScalar e_inf(
+    "e_inf",
+    average(thermo.he(p_inf + (0 * thermo.p()), T_inf + (0 * thermo.T()))));
+
+// Read blending coefficient, optionally assign = 1
 const volScalarField acousticBlending(
     IOobject(
         "acousticBlending",
@@ -28,8 +34,10 @@ const volScalarField acousticBlending(
         1));
 
 // Initially damp fields
-U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
 rho = (rho * acousticBlending) - (rho_inf * (acousticBlending - 1));
 rhoU = (rhoU * acousticBlending) - (rho_inf * U_inf * (acousticBlending - 1));
+rhoE = (rhoE * acousticBlending) - (rho_inf * e_inf * (acousticBlending - 1));
+U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
+e = (e * acousticBlending) - (e_inf * (acousticBlending - 1));
 T = (T * acousticBlending) - (T_inf * (acousticBlending - 1));
 p = (p * acousticBlending) - (p_inf * (acousticBlending - 1));
