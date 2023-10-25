@@ -19,6 +19,20 @@ const dimensionedScalar e_inf(
     "e_inf",
     average(thermo.he(p_inf + (0 * thermo.p()), T_inf + (0 * thermo.T()))));
 
+// Get freestream effective viscosity and thermal diffusivity
+const bool turbulenceDamping = readBool(runTime.controlDict().lookup("turbulenceDamping"));
+// if (turbulenceDamping == true)
+// {
+const dimensionedScalar muEff_inf(
+    "muEff_inf",
+    turbulence->muEff()->dimensions(),
+    readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("muEff")));
+const dimensionedScalar alphaEff_inf(
+    "alphaEff_inf",
+    turbulence->alphaEff()->dimensions(),
+    readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("alphaEff")));
+//}
+
 // Read blending coefficient, optionally assign = 1
 const volScalarField acousticBlending(
     IOobject(
@@ -41,3 +55,8 @@ U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
 e = (e * acousticBlending) - (e_inf * (acousticBlending - 1));
 T = (T * acousticBlending) - (T_inf * (acousticBlending - 1));
 p = (p * acousticBlending) - (p_inf * (acousticBlending - 1));
+if (turbulenceDamping == true)
+{
+    turbulence->muEff() = (turbulence->muEff() * acousticBlending) - (muEff_inf * (acousticBlending - 1));
+    turbulence->alphaEff() = (turbulence->alphaEff() * acousticBlending) - (alphaEff_inf * (acousticBlending - 1));
+}

@@ -55,4 +55,9 @@ for (uint8_t i = 0; i < 4; i++)
 
     // Correct turbulence fields
     turbulence->correct();
+    if (turbulenceDamping == true)
+    {
+        turbulence->muEff() = (turbulence->muEff() * acousticBlending) - (muEff_inf * (acousticBlending - 1));
+        turbulence->alphaEff() = (turbulence->alphaEff() * acousticBlending) - (alphaEff_inf * (acousticBlending - 1));
+    }
 }
