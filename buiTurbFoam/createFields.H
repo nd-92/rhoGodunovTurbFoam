@@ -1,3 +1,4 @@
+
 // Thermo fields
 Info << "Reading thermophysical properties" << endl;
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
@@ -82,13 +83,3 @@ autoPtr<compressible::turbulenceModel> turbulence(
         U,
         phi,
         thermo));
-
-// Runge-Kutta coefficient
-constexpr double betaReciprocal[4] = {1 / 0.1100, 1 / 0.2766, 2.000, 1.000};
-
-const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
-
-// Courant number
-scalar CoNum = 0.0;
-scalar meanCoNum = 0.0;
-scalar velMag = 0.0;

@@ -25,9 +25,10 @@ Application
     buiTurbFoam
 
 Description
-    Density-based shock-capturing compressible flow solver based on the Roe
-    flux difference splitting scheme of Bui with absorbing sponge zones
-    and explicitly bounded fields
+    Density-based compressible transient solver using the flux difference
+    splitting scheme of Bui and Runge Kutta 4-stage time integration.
+    Primarily designed for LES, and with optional absorption-based acoustic
+    damping
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,10 +51,28 @@ Description
 int main(int argc, char *argv[])
 {
 
+    argList::addNote(
+        "Density-based compressible transient solver using the flux difference"
+        " splitting scheme of Bui and Runge Kutta 4-stage time integration."
+        "Primarily designed for LES, and with optional absorption-based acoustic damping.");
+
+#include "postProcess.H"
 #include "setRootCase.H"
 #include "createTime.H"
 #include "createMesh.H"
 #include "createFields.H"
+
+    // Runge-Kutta coefficient
+    constexpr double betaReciprocal[4] = {1 / 0.1100, 1 / 0.2766, 2.000, 1.000};
+
+    // Damping switch
+    const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
+
+    // Courant number
+    scalar CoNum = 0.0;
+    scalar meanCoNum = 0.0;
+    scalar velMag = 0.0;
+
 #include "createTimeControls.H"
 
     Info << "Starting time loop" << endl;
