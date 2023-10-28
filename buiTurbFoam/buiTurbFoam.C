@@ -52,9 +52,10 @@ int main(int argc, char *argv[])
 {
 
     argList::addNote(
-        "Density-based compressible transient solver using the flux difference"
-        " splitting scheme of Bui and Runge Kutta 4-stage time integration."
-        "Primarily designed for LES, and with optional absorption-based acoustic damping.");
+        "Density-based compressible transient solver using the flux"
+        " difference splitting scheme of Bui and Runge Kutta 4-stage"
+        " time integration.  Primarily designed for LES, and with"
+        " optional absorption-based acoustic damping.");
 
 #include "postProcess.H"
 #include "setRootCase.H"
