@@ -14,15 +14,15 @@ for (uint8_t i = 0; i < 4; i++)
 
     // Time integration
     solve(                                                                                                                                                                                            //
-        betaReciprocal[i] * fvm::ddt(rho)                                                                                                                                                             //
+        1 / beta[i] * fvm::ddt(rho)                                                                                                                                                                   //
         + fvc::div(dbnsFlux.rhoFlux()));                                                                                                                                                              //
     solve(                                                                                                                                                                                            //
-        betaReciprocal[i] * fvm::ddt(rhoU)                                                                                                                                                            //
+        1 / beta[i] * fvm::ddt(rhoU)                                                                                                                                                                  //
         + fvc::div(dbnsFlux.rhoUFlux())                                                                                                                                                               //
         - fvc::laplacian(turbulence->muEff(), U)                                                                                                                                                      //
         - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U)))));                                                                                                                               //
     solve(                                                                                                                                                                                            //
-        betaReciprocal[i] * fvm::ddt(rhoE)                                                                                                                                                            //
+        1 / beta[i] * fvm::ddt(rhoE)                                                                                                                                                                  //
         + fvc::div(dbnsFlux.rhoEFlux())                                                                                                                                                               //
         - fvc::div((fvc::interpolate(turbulence->muEff()) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))) & fvc::interpolate(U)) //
         - fvc::laplacian(turbulence->alphaEff(), e));                                                                                                                                                 //
@@ -33,7 +33,7 @@ for (uint8_t i = 0; i < 4; i++)
     rhoU.boundaryFieldRef() == rho.boundaryField() * U.boundaryField();
 
     // Calculate internal energy
-    e = (rhoE / rho) - (0.5 * magSqr(U));
+    e = ((rhoE / rho) - (0.5 * magSqr(U)));
     e.correctBoundaryConditions();
 
     // Correct thermodynamics

@@ -1,4 +1,3 @@
-
 // Thermo fields
 Info << "Reading thermophysical properties" << endl;
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));

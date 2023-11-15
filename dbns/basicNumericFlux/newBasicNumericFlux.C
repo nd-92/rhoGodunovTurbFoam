@@ -37,7 +37,7 @@ Foam::autoPtr<Foam::basicNumericFlux> Foam::basicNumericFlux::New(
     const dictionary &subDict =
         p.mesh().schemesDict().subDict("divSchemes").subDict("dbns");
 
-    word name = word(subDict.lookup("flux")) + "Flux" + word(subDict.lookup("limiter")) + "Limiter";
+    const word name = word(subDict.lookup("flux")) + "Flux" + word(subDict.lookup("limiter")) + "Limiter";
 
     Info << "Selecting numericFlux " << name << endl;
 

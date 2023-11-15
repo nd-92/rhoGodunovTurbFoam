@@ -51,10 +51,10 @@ const volScalarField acousticBlending(
 rho = (rho * acousticBlending) - (rho_inf * (acousticBlending - 1));
 rhoU = (rhoU * acousticBlending) - (rho_inf * U_inf * (acousticBlending - 1));
 rhoE = (rhoE * acousticBlending) - (rho_inf * e_inf * (acousticBlending - 1));
-U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
-e = (e * acousticBlending) - (e_inf * (acousticBlending - 1));
-T = (T * acousticBlending) - (T_inf * (acousticBlending - 1));
-p = (p * acousticBlending) - (p_inf * (acousticBlending - 1));
+// U = (U * acousticBlending) - (U_inf * (acousticBlending - 1));
+// e = (e * acousticBlending) - (e_inf * (acousticBlending - 1));
+// T = (T * acousticBlending) - (T_inf * (acousticBlending - 1));
+// p = (p * acousticBlending) - (p_inf * (acousticBlending - 1));
 if (turbulenceDamping == true)
 {
     turbulence->muEff() = (turbulence->muEff() * acousticBlending) - (muEff_inf * (acousticBlending - 1));

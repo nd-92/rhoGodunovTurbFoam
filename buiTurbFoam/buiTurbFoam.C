@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 #include "createFields.H"
 
     // Runge-Kutta coefficient
-    constexpr double betaReciprocal[4] = {1 / 0.1100, 1 / 0.2766, 2.000, 1.000};
+    constexpr double beta[4] = {0.1100, 0.2766, 0.5, 1.000};
 
     // Damping switch
     const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
