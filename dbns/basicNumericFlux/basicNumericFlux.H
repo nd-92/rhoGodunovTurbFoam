@@ -81,9 +81,9 @@ namespace Foam
                 const volScalarField &p,
                 const volVectorField &U,
                 const volScalarField &T,
-                const surfaceScalarField &buiEps,
-                basicThermo &thermo),
-            (p, U, T, buiEps, thermo));
+                const volScalarField &upwindingFactor,
+                const basicThermo &thermo),
+            (p, U, T, upwindingFactor, thermo));
 #endif
 
         // Constructors
@@ -97,8 +97,8 @@ namespace Foam
             const volScalarField &p,
             const volVectorField &U,
             const volScalarField &T,
-            const surfaceScalarField &buiEps,
-            basicThermo &thermo);
+            const volScalarField &upwindingFactor,
+            const basicThermo &thermo);
 
         //- Destructor
         virtual ~basicNumericFlux();
@@ -121,17 +121,6 @@ namespace Foam
 
         //- Return energy flux
         virtual const surfaceScalarField &rhoEFlux() const = 0;
-
-        // Return residuals
-
-        //- Return density equation residual
-        virtual tmp<scalarField> rhoResidual() const = 0;
-
-        //- Return momentum equation flux
-        virtual tmp<vectorField> rhoUResidual() const = 0;
-
-        //- Return energy equation flux
-        virtual tmp<scalarField> rhoEResidual() const = 0;
 
         // Update fluxes based on current state
 

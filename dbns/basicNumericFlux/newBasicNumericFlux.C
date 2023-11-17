@@ -31,8 +31,8 @@ Foam::autoPtr<Foam::basicNumericFlux> Foam::basicNumericFlux::New(
     const volScalarField &p,
     const volVectorField &U,
     const volScalarField &T,
-    const surfaceScalarField &buiEps,
-    basicThermo &thermo)
+    const volScalarField &upwindingFactor,
+    const basicThermo &thermo)
 {
     const dictionary &subDict =
         p.mesh().schemesDict().subDict("divSchemes").subDict("dbns");
@@ -52,7 +52,7 @@ Foam::autoPtr<Foam::basicNumericFlux> Foam::basicNumericFlux::New(
             << exit(FatalError);
     }
 
-    return autoPtr<basicNumericFlux>(ctorPtr(p, U, T, buiEps, thermo));
+    return autoPtr<basicNumericFlux>(ctorPtr(p, U, T, upwindingFactor, thermo));
 }
 
 // ************************************************************************* //

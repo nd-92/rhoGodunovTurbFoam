@@ -36,13 +36,14 @@ Foam::numericFlux<Flux, Limiter>::numericFlux(
     const volScalarField &p,
     const volVectorField &U,
     const volScalarField &T,
-    const surfaceScalarField &buiEps,
-    basicThermo &thermo)
+    // const surfaceScalarField &buiEps,
+    const volScalarField &upwindingFactor,
+    const basicThermo &thermo)
     : numericFluxBase<Flux>(p.mesh()),
       p_(p),
       U_(U),
       T_(T),
-      buiEps_(buiEps),
+      buiEps_(fvc::interpolate(upwindingFactor)),
       thermo_(thermo),
       rhoFlux_(
           IOobject(

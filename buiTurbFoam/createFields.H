@@ -31,7 +31,7 @@ volVectorField rhoU(
         mesh,
         IOobject::NO_READ,
         IOobject::NO_WRITE),
-    rho *U);
+    thermo.rho() * U);
 volScalarField rhoE(
     IOobject(
         "rhoE",
@@ -39,7 +39,7 @@ volScalarField rhoE(
         mesh,
         IOobject::NO_READ,
         IOobject::NO_WRITE),
-    rho *(e + 0.5 * magSqr(U)));
+    thermo.rho() * (e + 0.5 * magSqr(U)));
 
 // Upwinding factor
 Info << "Reading field upwindingFactor" << endl;
@@ -55,21 +55,13 @@ const volScalarField upwindingFactor(
         "one",
         dimless,
         1));
-const surfaceScalarField buiEps(
-    IOobject(
-        "buiEps",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::NO_WRITE),
-    fvc::interpolate(upwindingFactor));
 
 // Numeric flux
 autoPtr<basicNumericFlux> dbnsFluxPtr = basicNumericFlux::New(
     p,
     U,
     T,
-    buiEps,
+    upwindingFactor,
     thermo);
 basicNumericFlux &dbnsFlux = dbnsFluxPtr();
 const surfaceScalarField &phi = dbnsFlux.rhoFlux();

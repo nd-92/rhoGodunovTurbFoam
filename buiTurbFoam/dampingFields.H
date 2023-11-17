@@ -1,11 +1,11 @@
 // Get reference values for damping
 const dimensionedScalar T_inf(
     "T_inf",
-    T.dimensions(),
+    thermo.T().dimensions(),
     readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("T")));
 const dimensionedScalar p_inf(
     "p_inf",
-    p.dimensions(),
+    thermo.p().dimensions(),
     readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("p")));
 const dimensionedScalar rho_inf(
     "rho_inf",

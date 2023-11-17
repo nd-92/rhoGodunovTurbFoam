@@ -74,7 +74,7 @@ namespace Foam
         const surfaceScalarField buiEps_;
 
         //- Reference to the thermophysicalModel
-        basicThermo &thermo_;
+        const basicThermo &thermo_;
 
         // Fluxes
 
@@ -111,37 +111,18 @@ namespace Foam
         {
             return rhoFlux_.internalField();
         }
-        /*
-                //- Return access to internal field of mass flux
-                scalarField& rhoFluxI()
-                {
-                    return rhoFlux_.internalField();
-                }
-        */
+
         //- Return internal field of momentum flux
         const vectorField &rhoUFluxI() const
         {
             return rhoUFlux_.internalField();
         }
-        /*
-                //- Return access to internal field of momentum flux
-                vectorField& rhoUFluxI()
-                {
-                    return rhoUFlux_.internalField();
-                }
-        */
+
         //- Return access to internal field of energy flux
         const scalarField &rhoEFluxI() const
         {
             return rhoEFlux_.internalField();
         }
-        /*
-                //- Return access to internal field of energy flux
-                scalarField& rhoEFluxI()
-                {
-                    return rhoEFlux_.internalField();
-                }
-        */
 
     public:
         //- Runtime type information
@@ -154,8 +135,8 @@ namespace Foam
             const volScalarField &p,
             const volVectorField &U,
             const volScalarField &T,
-            const surfaceScalarField &buiEps,
-            basicThermo &thermo);
+            const volScalarField &upwindingFactor,
+            const basicThermo &thermo);
 
         //- Destructor
         virtual ~numericFlux()
@@ -182,26 +163,6 @@ namespace Foam
         virtual const surfaceScalarField &rhoEFlux() const
         {
             return rhoEFlux_;
-        }
-
-        // Return residuals
-
-        //- Return density equation residual
-        virtual tmp<scalarField> rhoResidual() const
-        {
-            return fvc::div(rhoFlux_)().internalField();
-        }
-
-        //- Return momentum equation flux
-        virtual tmp<vectorField> rhoUResidual() const
-        {
-            return fvc::div(rhoUFlux_)().internalField();
-        }
-
-        //- Return energy equation flux
-        virtual tmp<scalarField> rhoEResidual() const
-        {
-            return fvc::div(rhoEFlux_)().internalField();
         }
 
         // Update fluxes based on current state
