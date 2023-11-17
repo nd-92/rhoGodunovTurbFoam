@@ -2,8 +2,8 @@
 Info << "Reading thermophysical properties" << endl;
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
 psiThermo &thermo = pThermo();
-thermo.validate(args.executable(), "e");
-volScalarField &e = thermo.he();
+thermo.validate(args.executable(), "h");
+volScalarField &h = thermo.he();
 volScalarField &p = thermo.p();
 volScalarField &T = thermo.T();
 
@@ -40,7 +40,7 @@ volScalarField rhoE(
         mesh,
         IOobject::NO_READ,
         IOobject::NO_WRITE),
-    thermo.rho() * (e + 0.5 * magSqr(U)));
+    thermo.rho() * (h + 0.5 * magSqr(U)) - p);
 
 // Upwinding factor
 Info << "Reading field upwindingFactor" << endl;
