@@ -80,11 +80,11 @@ int main(int argc, char *argv[])
 
     if (applyDamping == true)
     {
-#include "dampingFields.H"
+#include "dampingFieldsHEqn.H"
         while (runTime.run())
         {
             // Execute main solver loop
-#include "buiTurbFoamDamping.H"
+#include "buiTurbFoamHEqnDamping.H"
 
             // Write runtime output
             runTime.write();
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
         while (runTime.run())
         {
             // Execute main solver loop
-#include "buiTurbFoam.H"
+#include "buiTurbFoamHEqn.H"
 
             // Write runtime output
             runTime.write();
