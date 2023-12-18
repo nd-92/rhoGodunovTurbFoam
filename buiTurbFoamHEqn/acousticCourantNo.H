@@ -22,36 +22,27 @@ License
     along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
 
 Global
-    CourantNo
+    acousticCourantNo
 
 Description
     Calculates and outputs the mean and maximum Courant Numbers.
 
 \*---------------------------------------------------------------------------*/
 
-if (mesh.nInternalFaces() || Pstream::parRun())
+surfaceScalarField amaxSf(                                                                                       //
+    0.5 *                                                                                                        //
+    (mag(((fvc::interpolate(rhoU) / fvc::interpolate(rho)) & mesh.Sf()))                                         //
+     + (fvc::interpolate(sqrt((thermo.Cp() / thermo.Cv()) * (thermo.Cp() - thermo.Cv()) * T)) * mesh.magSf()))); //
+
+if (mesh.nInternalFaces())
 {
-    surfaceScalarField phiOverRho = mag(phi) / fvc::interpolate(rho);
+    scalarField sumAmaxSf(fvc::surfaceSum(amaxSf)().primitiveField());
 
-    surfaceScalarField SfUfbyDelta = mesh.surfaceInterpolation::deltaCoeffs() * phiOverRho;
+    CoNum = 0.5 * gMax(sumAmaxSf / mesh.V().field()) * runTime.deltaTValue();
 
-    CoNum = max(SfUfbyDelta / mesh.magSf()).value() * runTime.deltaT().value();
-
-    meanCoNum = (sum(SfUfbyDelta) / sum(mesh.magSf())).value() * runTime.deltaT().value();
-}
-else
-{
-    // Single cell mesh: Co is still defined; use cell formulation
-
-    const scalar deltaT = runTime.deltaT().value();
-
-    const scalar deltaX = Foam::cbrt(mesh.V()[0]);
-
-    CoNum = velMag * deltaT / deltaX;
-
-    meanCoNum = CoNum;
+    meanCoNum = 0.5 * (gSum(sumAmaxSf) / gSum(mesh.V().field())) * runTime.deltaTValue();
 }
 
-Info << "Courant Number mean: " << meanCoNum << " max: " << CoNum << endl;
+Info << "Mean and max acoustic Courant Numbers = " << meanCoNum << " " << CoNum << endl;
 
 // ************************************************************************* //

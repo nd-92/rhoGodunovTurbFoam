@@ -1,5 +1,5 @@
 #include "readTimeControls.H"
-#include "compressibleCourantNo.H"
+#include "acousticCourantNo.H"
 #include "setDeltaT.H"
 
 runTime++;
