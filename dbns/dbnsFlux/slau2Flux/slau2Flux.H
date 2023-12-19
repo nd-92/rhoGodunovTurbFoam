@@ -83,24 +83,6 @@ namespace Foam
             const vector &Sf,
             const scalar &magSf,
             const scalar &buiEps) const;
-
-        void evaluateFreestreamFlux(
-            scalar &rhoFlux,
-            vector &rhoUFlux,
-            scalar &rhoEFlux,
-            const scalar &pLeft,
-            const scalar &pRight,
-            const vector &ULeft,
-            const vector &URight,
-            const scalar &TLeft,
-            const scalar &TRight,
-            const scalar &RLeft,
-            const scalar &RRight,
-            const scalar &CvLeft,
-            const scalar &CvRight,
-            const vector &Sf,
-            const scalar &magSf,
-            const scalar &buiEps) const;
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

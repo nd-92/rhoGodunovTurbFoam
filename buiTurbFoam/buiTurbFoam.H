@@ -38,12 +38,12 @@ for (uint8_t i = 0; i < 4; i++)
 
     // Correct thermodynamics
     thermo.correct();
-    rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + 0.5 * magSqr(U.boundaryField()));
+    // rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + 0.5 * magSqr(U.boundaryField()));
 
     // Compute p from rho
     p.ref() = rho() / thermo.psi();
     p.correctBoundaryConditions();
-    rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
+    // rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
 
     // Correct turbulence fields
     turbulence->correct();

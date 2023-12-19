@@ -49,14 +49,13 @@ namespace Foam
         // Private data
 
         //- Limiter value
-        scalar epsilonPrime_;
+        const scalar epsilonPrime_ = 0.05;
 
     public:
         // Constructor
 
         //- Construct null
         WangLimiter()
-            : epsilonPrime_(0.05)
         {
         }
 

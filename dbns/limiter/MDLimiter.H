@@ -101,11 +101,11 @@ namespace Foam
                       pTraits<Type>::one))
         {
             // Collect min and max values from neighbourhood
-            GeoFieldType phiMinValue(
+            const GeoFieldType phiMinValue(
                 "phiMinValue",
                 phi);
 
-            GeoFieldType phiMaxValue(
+            const GeoFieldType phiMaxValue(
                 "phiMaxValue",
                 phi);
 
@@ -172,8 +172,8 @@ namespace Foam
                 const label &own = owner[faceI];
                 const label &nei = neighbour[faceI];
 
-                vector deltaRLeft = faceCentre[faceI] - cellCentre[own];
-                vector deltaRRight = faceCentre[faceI] - cellCentre[nei];
+                const vector deltaRLeft = faceCentre[faceI] - cellCentre[own];
+                const vector deltaRRight = faceCentre[faceI] - cellCentre[nei];
 
                 // Find minimal limiter value in each cell
 
