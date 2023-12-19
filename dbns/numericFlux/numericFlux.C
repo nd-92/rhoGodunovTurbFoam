@@ -81,6 +81,8 @@ template <class Flux, class Limiter>
 void Foam::numericFlux<Flux, Limiter>::computeFlux()
 {
     // Get face-to-cell addressing: face area point from owner to neighbour
+    // const unallocLabelList &owner = this->mesh().owner();
+    // const unallocLabelList &neighbour = this->mesh().neighbour();
     const labelUList &owner = this->mesh().owner();
     const labelUList &neighbour = this->mesh().neighbour();
 
@@ -95,14 +97,36 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
     const volScalarField Cv = thermo_.Cv();
     const volScalarField R = thermo_.Cp() - Cv;
 
-    gradP = fvc::grad(p_);
-    gradP.correctBoundaryConditions();
+    // Get gradients
+    // Coupled patch update on gradients moved into gradScheme.C
+    // HJ, 22/Apr/2016;
 
-    gradU = fvc::grad(U_);
-    gradU.correctBoundaryConditions();
+    // Changed return type for gradient cacheing.  HJ, 22/Apr/2016
+    const tmp<volVectorField> tgradP = fvc::grad(p_);
+    const volVectorField &gradP = tgradP();
 
-    gradT = fvc::grad(T_);
-    gradT.correctBoundaryConditions();
+    const tmp<volTensorField> tgradU = fvc::grad(U_);
+    const volTensorField &gradU = tgradU();
+
+    const tmp<volVectorField> tgradT = fvc::grad(T_);
+    const volVectorField &gradT = tgradT();
+
+    MDLimiter<scalar, Limiter> scalarPLimiter(
+        this->p_,
+        gradP);
+
+    MDLimiter<vector, Limiter> vectorULimiter(
+        this->U_,
+        gradU);
+
+    MDLimiter<scalar, Limiter> scalarTLimiter(
+        this->T_,
+        gradT);
+
+    // Get limiters
+    const volScalarField &pLimiter = scalarPLimiter.phiLimiter();
+    const volVectorField &ULimiter = vectorULimiter.phiLimiter();
+    const volScalarField &TLimiter = scalarTLimiter.phiLimiter();
 
     // Calculate fluxes at internal faces
     forAll(owner, faceI)
@@ -118,12 +142,12 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
             rhoFlux_[faceI],
             rhoUFlux_[faceI],
             rhoEFlux_[faceI],
-            p_[own] + (deltaRLeft & gradP[own]),
-            p_[nei] + (deltaRRight & gradP[nei]),
-            U_[own] + (deltaRLeft & gradU[own]),
-            U_[nei] + (deltaRRight & gradU[nei]),
-            T_[own] + (deltaRLeft & gradT[own]),
-            T_[nei] + (deltaRRight & gradT[nei]),
+            p_[own] + pLimiter[own] * (deltaRLeft & gradP[own]),
+            p_[nei] + pLimiter[nei] * (deltaRRight & gradP[nei]),
+            U_[own] + cmptMultiply(ULimiter[own], (deltaRLeft & gradU[own])),
+            U_[nei] + cmptMultiply(ULimiter[nei], (deltaRRight & gradU[nei])),
+            T_[own] + TLimiter[own] * (deltaRLeft & gradT[own]),
+            T_[nei] + TLimiter[nei] * (deltaRRight & gradT[nei]),
             R[own],
             R[nei],
             Cv[own],
@@ -134,7 +158,7 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
     }
 
     // Update boundary field and values
-    forAll(p_.boundaryField(), patchi)
+    forAll(rhoFlux_.boundaryField(), patchi)
     {
         const fvPatch &curPatch = p_.boundaryField()[patchi].patch();
 
@@ -156,12 +180,14 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
         const fvPatchTensorField &pGradU = gradU.boundaryField()[patchi];
         const fvPatchVectorField &pGradT = gradT.boundaryField()[patchi];
 
+        // Limiters
+        const fvPatchScalarField &pPatchLim = pLimiter.boundaryField()[patchi];
+        const fvPatchVectorField &UPatchLim = ULimiter.boundaryField()[patchi];
+        const fvPatchScalarField &TPatchLim = TLimiter.boundaryField()[patchi];
+
         // Face areas
         const fvsPatchVectorField &pSf = Sf.boundaryField()[patchi];
         const fvsPatchScalarField &pMagSf = magSf.boundaryField()[patchi];
-        const fvsPatchScalarField &pBuiEps = buiEps_.boundaryField()[patchi];
-
-        const fvPatchVectorField &pCellCenter = cellCentre.boundaryField()[patchi];
 
         if (pp.coupled())
         {
@@ -196,23 +222,21 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
 
             // Geometry: call the raw cell-to-face vector by calling
             // the base patch (cell-to-face) delta coefficient
-            vectorField pDeltaRLeft;
-            vectorField pDdeltaRRight;
-            if (U_.boundaryField()[patchi].type() == "cyclic")
-            {
-                // Work out the right delta from the cell-to-cell delta
-                // across the coupled patch and left delta
-                pDeltaRLeft = curPatch.fvPatch::delta();
-                pDdeltaRRight = pDeltaRLeft - curPatch.delta();
-            }
-            else
-            {
-                const vectorField faceCenter = pp.patch().Cf();
-                const vectorField pCellCenterLeft = pCellCenter.patchInternalField();
-                const vectorField pCellCenterRight = pCellCenter.patchNeighbourField();
-                pDeltaRLeft = faceCenter - pCellCenterLeft;
-                pDdeltaRRight = faceCenter - pCellCenterRight;
-            }
+            // Work out the right delta from the cell-to-cell delta
+            // across the coupled patch and left delta
+            vectorField pDeltaRLeft = curPatch.fvPatch::delta();
+            vectorField pDdeltaRRight = pDeltaRLeft - curPatch.delta();
+
+            // Limiters
+
+            const scalarField ppLimiterLeft = pPatchLim.patchInternalField();
+            const scalarField ppLimiterRight = pPatchLim.patchNeighbourField();
+
+            const vectorField pULimiterLeft = UPatchLim.patchInternalField();
+            const vectorField pULimiterRight = UPatchLim.patchNeighbourField();
+
+            const scalarField pTLimiterLeft = TPatchLim.patchInternalField();
+            const scalarField pTLimiterRight = TPatchLim.patchNeighbourField();
 
             forAll(pp, facei)
             {
@@ -221,73 +245,43 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
                     pRhoUFlux[facei],
                     pRhoEFlux[facei],
 
-                    ppLeft[facei] + (pDeltaRLeft[facei] & pgradPLeft[facei]),
-
-                    ppRight[facei] + (pDdeltaRRight[facei] & pgradPRight[facei]),
-
-                    pULeft[facei] + (pDeltaRLeft[facei] & pgradULeft[facei]),
-
-                    pURight[facei] + (pDdeltaRRight[facei] & pgradURight[facei]),
-
-                    pTLeft[facei] + (pDeltaRLeft[facei] & pgradTLeft[facei]),
-
-                    pTRight[facei] + (pDdeltaRRight[facei] & pgradTRight[facei]),
-
+                    ppLeft[facei] + ppLimiterLeft[facei] *
+                                        (pDeltaRLeft[facei] & pgradPLeft[facei]),
+                    ppRight[facei] + ppLimiterRight[facei] *
+                                         (pDdeltaRRight[facei] & pgradPRight[facei]),
+                    pULeft[facei] + cmptMultiply(
+                                        pULimiterLeft[facei],
+                                        pDeltaRLeft[facei] & pgradULeft[facei]),
+                    pURight[facei] + cmptMultiply(
+                                         pULimiterRight[facei],
+                                         pDdeltaRRight[facei] & pgradURight[facei]),
+                    pTLeft[facei] + pTLimiterLeft[facei] *
+                                        (pDeltaRLeft[facei] & pgradTLeft[facei]),
+                    pTRight[facei] + pTLimiterRight[facei] *
+                                         (pDdeltaRRight[facei] & pgradTRight[facei]),
                     pR[facei],
                     pR[facei],
                     pCv[facei],
                     pCv[facei],
                     pSf[facei],
                     pMagSf[facei],
-                    pBuiEps[facei]);
-            }
-        }
-        else if (
-            isType<wallFvPatch>(p_.mesh().boundary()[patchi]))
-        {
-            forAll(pp, facei)
-            {
-                Flux::evaluateFlux(
-                    pRhoFlux[facei],
-                    pRhoUFlux[facei],
-                    pRhoEFlux[facei],
-                    pp[facei],
-                    pp[facei],
-                    pU[facei],
-                    pU[facei],
-                    pT[facei],
-                    pT[facei],
-                    pR[facei],
-                    pR[facei],
-                    pCv[facei],
-                    pCv[facei],
-                    pSf[facei],
-                    pMagSf[facei],
-                    1.0);
+                    buiEps_[facei]);
             }
         }
         else
         {
-            const scalarField ppLeft =
-                p_.boundaryField()[patchi].patchInternalField();
-
-            const vectorField pULeft =
-                U_.boundaryField()[patchi].patchInternalField();
-
-            const scalarField pTLeft =
-                T_.boundaryField()[patchi].patchInternalField();
-
             forAll(pp, facei)
             {
-                Flux::evaluateFreestreamFlux(
+                // Calculate fluxes
+                Flux::evaluateFlux(
                     pRhoFlux[facei],
                     pRhoUFlux[facei],
                     pRhoEFlux[facei],
-                    ppLeft[facei],
                     pp[facei],
-                    pULeft[facei],
+                    pp[facei],
                     pU[facei],
-                    pTLeft[facei],
+                    pU[facei],
+                    pT[facei],
                     pT[facei],
                     pR[facei],
                     pR[facei],
@@ -295,7 +289,7 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
                     pCv[facei],
                     pSf[facei],
                     pMagSf[facei],
-                    1.0);
+                    buiEps_[facei]);
             }
         }
     }
