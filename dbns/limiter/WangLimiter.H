@@ -68,7 +68,7 @@ namespace Foam
             const scalar &deltaOneMin,
             const scalar &extrapolate)
         {
-            scalar epsilonSquare =
+            const scalar epsilonSquare =
                 sqr(epsilonPrime_ * (deltaOneMax - deltaOneMin));
 
             if (extrapolate > VSMALL)

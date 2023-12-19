@@ -36,7 +36,6 @@ Foam::numericFlux<Flux, Limiter>::numericFlux(
     const volScalarField &p,
     const volVectorField &U,
     const volScalarField &T,
-    // const surfaceScalarField &buiEps,
     const volScalarField &upwindingFactor,
     const basicThermo &thermo)
     : numericFluxBase<Flux>(p.mesh()),
@@ -111,15 +110,15 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
     const tmp<volVectorField> tgradT = fvc::grad(T_);
     const volVectorField &gradT = tgradT();
 
-    MDLimiter<scalar, Limiter> scalarPLimiter(
+    const MDLimiter<scalar, Limiter> scalarPLimiter(
         this->p_,
         gradP);
 
-    MDLimiter<vector, Limiter> vectorULimiter(
+    const MDLimiter<vector, Limiter> vectorULimiter(
         this->U_,
         gradU);
 
-    MDLimiter<scalar, Limiter> scalarTLimiter(
+    const MDLimiter<scalar, Limiter> scalarTLimiter(
         this->T_,
         gradT);
 
@@ -192,23 +191,14 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
         if (pp.coupled())
         {
             // Coupled patch
-            const scalarField ppLeft =
-                p_.boundaryField()[patchi].patchInternalField();
+            const scalarField ppLeft = p_.boundaryField()[patchi].patchInternalField();
+            const scalarField ppRight = p_.boundaryField()[patchi].patchNeighbourField();
 
-            const scalarField ppRight =
-                p_.boundaryField()[patchi].patchNeighbourField();
+            const vectorField pULeft = U_.boundaryField()[patchi].patchInternalField();
+            const vectorField pURight = U_.boundaryField()[patchi].patchNeighbourField();
 
-            const vectorField pULeft =
-                U_.boundaryField()[patchi].patchInternalField();
-
-            const vectorField pURight =
-                U_.boundaryField()[patchi].patchNeighbourField();
-
-            const scalarField pTLeft =
-                T_.boundaryField()[patchi].patchInternalField();
-
-            const scalarField pTRight =
-                T_.boundaryField()[patchi].patchNeighbourField();
+            const scalarField pTLeft = T_.boundaryField()[patchi].patchInternalField();
+            const scalarField pTRight = T_.boundaryField()[patchi].patchNeighbourField();
 
             // Gradients
             const vectorField pgradPLeft = pGradP.patchInternalField();
@@ -224,8 +214,8 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
             // the base patch (cell-to-face) delta coefficient
             // Work out the right delta from the cell-to-cell delta
             // across the coupled patch and left delta
-            vectorField pDeltaRLeft = curPatch.fvPatch::delta();
-            vectorField pDdeltaRRight = pDeltaRLeft - curPatch.delta();
+            const vectorField pDeltaRLeft = curPatch.fvPatch::delta();
+            const vectorField pDdeltaRRight = pDeltaRLeft - curPatch.delta();
 
             // Limiters
 
@@ -244,21 +234,12 @@ void Foam::numericFlux<Flux, Limiter>::computeFlux()
                     pRhoFlux[facei],
                     pRhoUFlux[facei],
                     pRhoEFlux[facei],
-
-                    ppLeft[facei] + ppLimiterLeft[facei] *
-                                        (pDeltaRLeft[facei] & pgradPLeft[facei]),
-                    ppRight[facei] + ppLimiterRight[facei] *
-                                         (pDdeltaRRight[facei] & pgradPRight[facei]),
-                    pULeft[facei] + cmptMultiply(
-                                        pULimiterLeft[facei],
-                                        pDeltaRLeft[facei] & pgradULeft[facei]),
-                    pURight[facei] + cmptMultiply(
-                                         pULimiterRight[facei],
-                                         pDdeltaRRight[facei] & pgradURight[facei]),
-                    pTLeft[facei] + pTLimiterLeft[facei] *
-                                        (pDeltaRLeft[facei] & pgradTLeft[facei]),
-                    pTRight[facei] + pTLimiterRight[facei] *
-                                         (pDdeltaRRight[facei] & pgradTRight[facei]),
+                    ppLeft[facei] + ppLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradPLeft[facei]),
+                    ppRight[facei] + ppLimiterRight[facei] * (pDdeltaRRight[facei] & pgradPRight[facei]),
+                    pULeft[facei] + cmptMultiply(pULimiterLeft[facei], pDeltaRLeft[facei] & pgradULeft[facei]),
+                    pURight[facei] + cmptMultiply(pULimiterRight[facei], pDdeltaRRight[facei] & pgradURight[facei]),
+                    pTLeft[facei] + pTLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradTLeft[facei]),
+                    pTRight[facei] + pTLimiterRight[facei] * (pDdeltaRRight[facei] & pgradTRight[facei]),
                     pR[facei],
                     pR[facei],
                     pCv[facei],

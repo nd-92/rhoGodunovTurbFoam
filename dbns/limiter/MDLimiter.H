@@ -60,11 +60,7 @@ namespace Foam
         typedef GeometricField<Type, fvPatchField, volMesh> GeoFieldType;
 
         typedef Field<typename outerProduct<vector, Type>::type> GradFieldType;
-        typedef GeometricField<
-            typename outerProduct<vector, Type>::type,
-            fvPatchField,
-            volMesh>
-            GeoGradFieldType;
+        typedef GeometricField<typename outerProduct<vector, Type>::type, fvPatchField, volMesh> GeoGradFieldType;
 
     private:
         // Private data
@@ -99,7 +95,10 @@ namespace Foam
                       IOobject::NO_READ,
                       IOobject::NO_WRITE),
                   mesh_,
-                  dimensioned<Type>("pLimiter", dimless, pTraits<Type>::one))
+                  dimensioned<Type>(
+                      "pLimiter",
+                      dimless,
+                      pTraits<Type>::one))
         {
             // Collect min and max values from neighbourhood
             GeoFieldType phiMinValue(
@@ -135,23 +134,19 @@ namespace Foam
             {
                 if (phi.boundaryField()[patchI].coupled())
                 {
-                    const Field<Type> pNei =
-                        phi.boundaryField()[patchI].patchNeighbourField();
+                    const Field<Type> pNei = phi.boundaryField()[patchI].patchNeighbourField();
 
-                    const labelList &fc =
-                        phi.boundaryField()[patchI].patch().faceCells();
+                    const labelList &fc = phi.boundaryField()[patchI].patch().faceCells();
 
                     forAll(fc, faceI)
                     {
                         const label &curFC = fc[faceI];
 
                         // min value
-                        phiMinIn[curFC] =
-                            min(phiMinIn[curFC], pNei[faceI]);
+                        phiMinIn[curFC] = min(phiMinIn[curFC], pNei[faceI]);
 
                         // max value
-                        phiMaxIn[curFC] =
-                            max(phiMaxIn[curFC], pNei[faceI]);
+                        phiMaxIn[curFC] = max(phiMaxIn[curFC], pNei[faceI]);
                     }
                 }
             }
@@ -207,19 +202,16 @@ namespace Foam
                     // Get patch
                     const fvPatch &p = phi.boundaryField()[patchI].patch();
 
-                    const FieldType pNei =
-                        phi.boundaryField()[patchI].patchNeighbourField();
+                    const FieldType pNei = phi.boundaryField()[patchI].patchNeighbourField();
 
                     const labelList &fc = p.faceCells();
 
                     const vectorField deltaR = p.Cf() - p.Cn();
 
                     // Get gradients
-                    const GradFieldType gradPhiLeft =
-                        gradPhi.boundaryField()[patchI].patchInternalField();
+                    const GradFieldType gradPhiLeft = gradPhi.boundaryField()[patchI].patchInternalField();
 
-                    const GradFieldType gradPhiRight =
-                        gradPhi.boundaryField()[patchI].patchNeighbourField();
+                    const GradFieldType gradPhiRight = gradPhi.boundaryField()[patchI].patchNeighbourField();
 
                     // Find minimal limiter value in each cell
                     forAll(fc, faceI)

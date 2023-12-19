@@ -152,15 +152,9 @@ void Foam::buiFlux::evaluateFlux(
 
     const scalar UL = ULeft & normalVector;
     const scalar UR = URight & normalVector;
-    const scalar cLeft = sqrt(
-        max(
-            (kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)),
-            SMALL));
+    const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
 
-    const scalar cRight = sqrt(
-        max(
-            (kappaRight - 1) * (hRight - 0.5 * magSqr(URight)),
-            SMALL));
+    const scalar cRight = sqrt(max((kappaRight - 1) * (hRight - 0.5 * magSqr(URight)), SMALL));
 
     // First eigenvalue: U - c
     scalar eps = 2 * max(0, (UR - cRight) - (UL - cLeft));
@@ -214,9 +208,7 @@ void Foam::buiFlux::evaluateFlux(
 
     // Step 10: compute face flux 5-vector
     const scalar flux1 = 0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
-
     const vector flux24 = 0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
-
     const scalar flux5 = 0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
 
     // Compute private data
@@ -350,15 +342,9 @@ void Foam::buiFlux::evaluateFreestreamFlux(
 
     const scalar UL = ULeft & normalVector;
     const scalar UR = URight & normalVector;
-    const scalar cLeft = sqrt(
-        max(
-            (kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)),
-            SMALL));
+    const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
 
-    const scalar cRight = sqrt(
-        max(
-            (kappaRight - 1) * (hRight - 0.5 * magSqr(URight)),
-            SMALL));
+    const scalar cRight = sqrt(max((kappaRight - 1) * (hRight - 0.5 * magSqr(URight)), SMALL));
 
     // First eigenvalue: U - c
     scalar eps = 2 * max(0, (UR - cRight) - (UL - cLeft));
@@ -412,9 +398,7 @@ void Foam::buiFlux::evaluateFreestreamFlux(
 
     // Step 10: compute face flux 5-vector
     const scalar flux1 = 0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
-
     const vector flux24 = 0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
-
     const scalar flux5 = 0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
 
     // Compute private data

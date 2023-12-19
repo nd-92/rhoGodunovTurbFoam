@@ -69,7 +69,7 @@ namespace Foam
             const scalar &deltaOneMin,
             const scalar &extrapolate)
         {
-            scalar epsilonSquare = pow3(k_) * cellVolume;
+            const scalar epsilonSquare = pow3(k_) * cellVolume;
 
             if (mag(extrapolate) < SMALL)
             {
@@ -81,12 +81,7 @@ namespace Foam
                 lim = max(
                     0,
                     min(
-                        (
-                            (sqr(deltaOneMax) + epsilonSquare) * extrapolate + 2 * sqr(extrapolate) * deltaOneMax) /
-                            stabilise(
-                                extrapolate *
-                                    (sqr(deltaOneMax) + 2 * sqr(extrapolate) + deltaOneMax * extrapolate + epsilonSquare),
-                                SMALL),
+                        ((sqr(deltaOneMax) + epsilonSquare) * extrapolate + 2 * sqr(extrapolate) * deltaOneMax) / stabilise(extrapolate * (sqr(deltaOneMax) + 2 * sqr(extrapolate) + deltaOneMax * extrapolate + epsilonSquare), SMALL),
                         lim));
             }
             else if (extrapolate < VSMALL)
@@ -94,12 +89,7 @@ namespace Foam
                 lim = max(
                     0,
                     min(
-                        (
-                            (sqr(deltaOneMin) + epsilonSquare) * extrapolate + 2 * sqr(extrapolate) * deltaOneMin) /
-                            stabilise(
-                                extrapolate *
-                                    (sqr(deltaOneMin) + 2 * sqr(extrapolate) + deltaOneMin * extrapolate + epsilonSquare),
-                                SMALL),
+                        ((sqr(deltaOneMin) + epsilonSquare) * extrapolate + 2 * sqr(extrapolate) * deltaOneMin) / stabilise(extrapolate * (sqr(deltaOneMin) + 2 * sqr(extrapolate) + deltaOneMin * extrapolate + epsilonSquare), SMALL),
                         lim));
             }
         }
