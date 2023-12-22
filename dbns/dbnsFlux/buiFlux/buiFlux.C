@@ -1,25 +1,37 @@
 /*---------------------------------------------------------------------------*\
   =========                 |
-  \\      /  F ield         | foam-extend: Open Source CFD
-   \\    /   O peration     | Version:     3.2
-    \\  /    A nd           | Web:         http://www.foam-extend.org
-     \\/     M anipulation  | For copyright notice see file Copyright
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | www.openfoam.com
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of foam-extend.
+    This file is part of OpenFOAM.
 
-    foam-extend is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by the
-    Free Software Foundation, either version 3 of the License, or (at your
-    option) any later version.
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-    foam-extend is distributed in the hope that it will be useful, but
-    WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    General Public License for more details.
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
     You should have received a copy of the GNU General Public License
-    along with foam-extend.  If not, see <http://www.gnu.org/licenses/>.
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+Class
+    buiFlux
+
+Description
+    Implementation of Bui approximate Riemann solver scheme
+
+SourceFiles
+    buiFlux.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -207,14 +219,14 @@ void Foam::buiFlux::evaluateFlux(
     const scalar fluxRight15 = hRight * fluxRight11;
 
     // Step 10: compute face flux 5-vector
-    const scalar flux1 = 0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
-    const vector flux24 = 0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
-    const scalar flux5 = 0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
+    // const scalar flux1 = (0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31)));
+    // const vector flux24 = (0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324)));
+    // const scalar flux5 = (0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35)));
 
     // Compute private data
-    rhoFlux = flux1 * magSf;
-    rhoUFlux = flux24 * magSf;
-    rhoEFlux = flux5 * magSf;
+    rhoFlux = (0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31))) * magSf;
+    rhoUFlux = (0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324))) * magSf;
+    rhoEFlux = (0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35))) * magSf;
 }
 
 // ************************************************************************* //
