@@ -24,38 +24,57 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Class
+    rungeKutta
+
+Description
+    Implementation of constexpr Runge-Kutta time integration coefficients
+
+SourceFiles
+    rungeKutta.H
+
 \*---------------------------------------------------------------------------*/
 
-#include "basicNumericFlux.H"
+#ifndef rungeKutta_H
+#define rungeKutta_H
+
+#include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::basicNumericFlux> Foam::basicNumericFlux::New(
-    const volScalarField &p,
-    const volVectorField &U,
-    const volScalarField &T,
-    const volScalarField &upwindingFactor,
-    const basicThermo &thermo)
+namespace Foam
 {
-    const dictionary &subDict =
-        p.mesh().schemesDict().subDict("divSchemes").subDict("dbns");
 
-    const word name = word(subDict.lookup("flux")) + "Flux" + word(subDict.lookup("limiter")) + "Limiter";
+    /*---------------------------------------------------------------------------*\
+                               Class rungeKutta Declaration
+    \*---------------------------------------------------------------------------*/
 
-    Info << "Selecting numericFlux " << name << endl;
-
-    auto *ctorPtr = stateConstructorTable(name);
-
-    if (!ctorPtr)
+    class rungeKutta
     {
-        FatalErrorIn("basicNumericFlux::New(const fvMesh&)")
-            << "Unknown basicNumericFlux type " << name << nl << nl
-            << "Valid basicNumericFlux types are:" << nl
-            << stateConstructorTablePtr_->sortedToc() << nl
-            << exit(FatalError);
-    }
+    public:
+        // Constructor
+        constexpr inline rungeKutta(){};
 
-    return autoPtr<basicNumericFlux>(ctorPtr(p, U, T, upwindingFactor, thermo));
-}
+        // Destructor
+        inline ~rungeKutta(){};
+
+        // Return constexpr Runge-Kutta coefficient
+        constexpr inline scalar beta(const uint8_t i) const
+        {
+            return beta_[i];
+        }
+
+    private:
+        // Runge-Kutta coefficients
+        const scalar beta_[4] = {0.1100, 0.2766, 0.5, 1.000};
+    };
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

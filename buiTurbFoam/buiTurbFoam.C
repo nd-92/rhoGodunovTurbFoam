@@ -5,6 +5,9 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
+    Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2021 OpenCFD Ltd.
+-------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
 
@@ -46,7 +49,7 @@ Description
 #include "pointMesh.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
-#include "bound.H"
+#include "rungeKutta.H"
 
 int main(int argc, char *argv[])
 {
@@ -64,7 +67,7 @@ int main(int argc, char *argv[])
 #include "createFields.H"
 
     // Runge-Kutta coefficient
-    constexpr double beta[4] = {0.1100, 0.2766, 0.5, 1.000};
+    rungeKutta rkCoeffs;
 
     // Damping switch
     const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
