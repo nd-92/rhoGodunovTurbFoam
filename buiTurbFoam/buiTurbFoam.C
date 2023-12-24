@@ -43,7 +43,6 @@ Description
 #include "firstOrderLimiter.H"
 #include "BarthJespersenLimiter.H"
 #include "VenkatakrishnanLimiter.H"
-#include "WangLimiter.H"
 #include "numericFlux.H"
 #include "buiFlux.H"
 #include "pointMesh.H"

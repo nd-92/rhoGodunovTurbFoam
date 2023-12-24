@@ -112,17 +112,17 @@ void Foam::buiFlux::evaluateFlux(
     // Step 4: compute wave strengths:
 
     // Roe and Pike - formulation
-    const scalar r1 = (deltaP - rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
+    const scalar r1 = 0.5 * (deltaP - rhoTilde * cTilde * deltaContrV) / (sqr(cTilde));
     const scalar r2 = deltaRho - deltaP / sqr(cTilde);
-    const scalar r3 = (deltaP + rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
+    const scalar r3 = 0.5 * (deltaP + rhoTilde * cTilde * deltaContrV) / (sqr(cTilde));
 
     // Step 5: compute l vectors
 
     // rho row:
-    const scalar l1rho = 1;
-    const scalar l2rho = 1;
-    const scalar l3rho = 0;
-    const scalar l4rho = 1;
+    // const scalar l1rho = 1;
+    // const scalar l2rho = 1;
+    // const scalar l3rho = 0;
+    // const scalar l4rho = 1;
 
     // first U column
     const vector l1U = UTilde - cTilde * normalVector;
@@ -164,45 +164,45 @@ void Foam::buiFlux::evaluateFlux(
 
     const scalar UL = ULeft & normalVector;
     const scalar UR = URight & normalVector;
-    const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
 
+    const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
     const scalar cRight = sqrt(max((kappaRight - 1) * (hRight - 0.5 * magSqr(URight)), SMALL));
 
     // First eigenvalue: U - c
     scalar eps = 2 * max(0, (UR - cRight) - (UL - cLeft));
     if (lambda1 < eps)
     {
-        lambda1 = (sqr(lambda1) + sqr(eps)) / (2.0 * eps);
+        lambda1 = 0.5 * (sqr(lambda1) + sqr(eps)) / (eps);
     }
 
     // Second eigenvalue: U
     eps = 2 * max(0, UR - UL);
     if (lambda2 < eps)
     {
-        lambda2 = (sqr(lambda2) + sqr(eps)) / (2.0 * eps);
+        lambda2 = 0.5 * (sqr(lambda2) + sqr(eps)) / (eps);
     }
 
     // Third eigenvalue: U + c
     eps = 2 * max(0, (UR + cRight) - (UL + cLeft));
     if (lambda3 < eps)
     {
-        lambda3 = (sqr(lambda3) + sqr(eps)) / (2.0 * eps);
+        lambda3 = 0.5 * (sqr(lambda3) + sqr(eps)) / (eps);
     }
 
     // Step 8: Compute flux differences
 
     // Components of deltaF1
-    const scalar diffF11 = lambda1 * r1 * l1rho;
+    const scalar diffF11 = lambda1 * r1;
     const vector diffF124 = lambda1 * r1 * l1U;
     const scalar diffF15 = lambda1 * r1 * l1e;
 
     // Components of deltaF2
-    const scalar diffF21 = lambda2 * (r2 * l2rho + rhoTilde * l3rho);
+    const scalar diffF21 = lambda2 * r2;
     const vector diffF224 = lambda2 * (r2 * l2U + rhoTilde * l3U);
     const scalar diffF25 = lambda2 * (r2 * l2e + rhoTilde * l3e);
 
     // Components of deltaF3
-    const scalar diffF31 = lambda3 * r3 * l4rho;
+    const scalar diffF31 = lambda3 * r3;
     const vector diffF324 = lambda3 * r3 * l4U;
     const scalar diffF35 = lambda3 * r3 * l4e;
 

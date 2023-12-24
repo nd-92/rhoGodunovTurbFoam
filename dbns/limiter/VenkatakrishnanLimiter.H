@@ -53,14 +53,13 @@ namespace Foam
         // Private data
 
         //- Limiter value
-        scalar k_;
+        const scalar kCubed_ = 125;
 
     public:
         // Constructor
 
         //- Construct null
         VenkatakrishnanLimiter()
-            : k_(5)
         {
         }
 
@@ -72,29 +71,65 @@ namespace Foam
             const scalar &deltaOneMin,
             const scalar &extrapolate)
         {
-            const scalar epsilonSquare = pow3(k_) * cellVolume;
+            const scalar epsilonSquare = kCubed_ * cellVolume;
 
-            if (mag(extrapolate) < SMALL)
-            {
-                // Limiter remains unchanged
-                return;
-            }
-            else if (extrapolate > VSMALL)
-            {
-                lim = max(
-                    0,
-                    min(
-                        ((sqr(deltaOneMax) + epsilonSquare) * extrapolate + 2 * sqr(extrapolate) * deltaOneMax) / stabilise(extrapolate * (sqr(deltaOneMax) + 2 * sqr(extrapolate) + deltaOneMax * extrapolate + epsilonSquare), SMALL),
-                        lim));
-            }
-            else if (extrapolate < VSMALL)
-            {
-                lim = max(
-                    0,
-                    min(
-                        ((sqr(deltaOneMin) + epsilonSquare) * extrapolate + 2 * sqr(extrapolate) * deltaOneMin) / stabilise(extrapolate * (sqr(deltaOneMin) + 2 * sqr(extrapolate) + deltaOneMin * extrapolate + epsilonSquare), SMALL),
-                        lim));
-            }
+            if (mag(extrapolate) < SMALL) //
+            {                             //
+                // Limiter remains unchanged //
+                return;                                                          //
+            }                                                                    //
+            else if (extrapolate > VSMALL)                                       //
+            {                                                                    //
+                lim = max                                                        //
+                    (                                                            //
+                        0,                                                       //
+                        min                                                      //
+                        (                                                        //
+                            (                                                    //
+                                (sqr(deltaOneMax) + epsilonSquare) * extrapolate //
+                                + 2 * sqr(extrapolate) * deltaOneMax             //
+                                ) /                                              //
+                                stabilise                                        //
+                                (                                                //
+                                    extrapolate *                                //
+                                        (                                        //
+                                            sqr(deltaOneMax)                     //
+                                            + 2 * sqr(extrapolate)               //
+                                            + deltaOneMax * extrapolate          //
+                                            + epsilonSquare                      //
+                                            ),                                   //
+                                    SMALL                                        //
+                                    ),                                           //
+                            lim                                                  //
+                            )                                                    //
+                    );                                                           //
+            }                                                                    //
+            else if (extrapolate < VSMALL)                                       //
+            {                                                                    //
+                lim = max                                                        //
+                    (                                                            //
+                        0,                                                       //
+                        min                                                      //
+                        (                                                        //
+                            (                                                    //
+                                (sqr(deltaOneMin) + epsilonSquare) * extrapolate //
+                                + 2 * sqr(extrapolate) * deltaOneMin             //
+                                ) /                                              //
+                                stabilise                                        //
+                                (                                                //
+                                    extrapolate *                                //
+                                        (                                        //
+                                            sqr(deltaOneMin)                     //
+                                            + 2 * sqr(extrapolate)               //
+                                            + deltaOneMin * extrapolate          //
+                                            + epsilonSquare                      //
+                                            ),                                   //
+                                    SMALL                                        //
+                                    ),                                           //
+                            lim                                                  //
+                            )                                                    //
+                    );                                                           //
+            }                                                                    //
         }
 
         //- Set Type limiter

@@ -74,8 +74,7 @@ namespace Foam
             {
                 return;
             }
-
-            if (extrapolate - deltaOneMax > SMALL)
+            else if (extrapolate - deltaOneMax > SMALL)
             {
                 lim = min(lim, deltaOneMax / extrapolate);
             }

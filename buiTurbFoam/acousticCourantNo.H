@@ -32,14 +32,14 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-surfaceScalarField amaxSf(                                                                                       //
-    0.5 *                                                                                                        //
-    (mag(((fvc::interpolate(rhoU) / fvc::interpolate(rho)) & mesh.Sf()))                                         //
-     + (fvc::interpolate(sqrt((thermo.Cp() / thermo.Cv()) * (thermo.Cp() - thermo.Cv()) * T)) * mesh.magSf()))); //
+surfaceScalarField amaxSf(                                                                          //
+    0.5 *                                                                                           //
+    (mag(((fvc::interpolate(rhoU) / fvc::interpolate(rho)) & mesh.Sf()))                            //
+     + (fvc::interpolate(sqrt(thermo.gamma() * (thermo.Cp() - thermo.Cv()) * T)) * mesh.magSf()))); //
 
 if (mesh.nInternalFaces())
 {
-    scalarField sumAmaxSf(fvc::surfaceSum(amaxSf)().primitiveField());
+    const scalarField sumAmaxSf(fvc::surfaceSum(amaxSf)().primitiveField());
 
     CoNum = 0.5 * gMax(sumAmaxSf / mesh.V().field()) * runTime.deltaTValue();
 

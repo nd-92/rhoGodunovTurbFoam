@@ -6,8 +6,7 @@ runTime++;
 Info << "\nTime = " << runTime.value() << "\n";
 
 // Low storage Runge-Kutta time integration
-// forAll(beta, i)
-for (uint8_t i = 0; i < 4; i++)
+rkLoop(i)
 {
     // Solve the approximate Riemann problem for this time step
     dbnsFlux.computeFlux();

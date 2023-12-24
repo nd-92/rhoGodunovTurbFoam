@@ -49,6 +49,9 @@ namespace Foam
                                Class rungeKutta Declaration
     \*---------------------------------------------------------------------------*/
 
+// Macro for Runge-Kutta time integration
+#define rkLoop(i) for (uint8_t i = 0; i < 4; i++)
+
     class rungeKutta
     {
     public:
@@ -66,7 +69,7 @@ namespace Foam
 
     private:
         // Runge-Kutta coefficients
-        const scalar beta_[4] = {0.1100, 0.2766, 0.5, 1.000};
+        const scalar beta_[4] = {0.1100, 0.2766, 0.500, 1.000};
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
