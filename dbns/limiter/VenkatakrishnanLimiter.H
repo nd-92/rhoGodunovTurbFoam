@@ -73,9 +73,8 @@ namespace Foam
         {
             const scalar epsilonSquare = kCubed_ * cellVolume;
 
-            if (mag(extrapolate) < SMALL) //
-            {                             //
-                // Limiter remains unchanged //
+            if (mag(extrapolate) < SMALL)                                        //
+            {                                                                    //
                 return;                                                          //
             }                                                                    //
             else if (extrapolate > VSMALL)                                       //
