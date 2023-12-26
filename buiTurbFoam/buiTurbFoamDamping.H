@@ -1,6 +1,6 @@
 #include "readTimeControls.H"
-#include "acousticCourantNo.H"
-#include "setDeltaT.H"
+Co.calculate();
+Co.setDeltaT(maxDeltaT, maxCo, adjustTimeStep);
 
 runTime++;
 Info << "\nTime = " << runTime.value() << "\n";
@@ -11,15 +11,19 @@ rkLoop(i)
     // Solve the approximate Riemann problem for this time step
     dbnsFlux.computeFlux();
 
-    // Time integration
-    solve(                                                                                                                                                                                            //
-        1 / rkCoeffs.beta(i) * fvm::ddt(rho)                                                                                                                                                          //
-        + fvc::div(dbnsFlux.rhoFlux()));                                                                                                                                                              //
-    solve(                                                                                                                                                                                            //
-        1 / rkCoeffs.beta(i) * fvm::ddt(rhoU)                                                                                                                                                         //
-        + fvc::div(dbnsFlux.rhoUFlux())                                                                                                                                                               //
-        - fvc::laplacian(turbulence->muEff(), U)                                                                                                                                                      //
-        - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U)))));                                                                                                                               //
+    // Assemble and solve the density equation
+    solve(                                   //
+        1 / rkCoeffs.beta(i) * fvm::ddt(rho) //
+        + fvc::div(dbnsFlux.rhoFlux()));     //
+
+    // Assemble and solve the momentum equation
+    solve(                                                              //
+        1 / rkCoeffs.beta(i) * fvm::ddt(rhoU)                           //
+        + fvc::div(dbnsFlux.rhoUFlux())                                 //
+        - fvc::laplacian(turbulence->muEff(), U)                        //
+        - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))); //
+
+    // Assemble and solve the energy equation
     solve(                                                                                                                                                                                            //
         1 / rkCoeffs.beta(i) * fvm::ddt(rhoE)                                                                                                                                                         //
         + fvc::div(dbnsFlux.rhoEFlux())                                                                                                                                                               //
@@ -51,12 +55,12 @@ rkLoop(i)
     p.ref() = ((rho / thermo.psi()) * acousticBlending) - (p_inf * (acousticBlending - 1));
     p.correctBoundaryConditions();
     rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
+}
 
-    // Correct turbulence fields
-    turbulence->correct();
-    if (turbulenceDamping == true)
-    {
-        turbulence->muEff() = (turbulence->muEff() * acousticBlending) - (muEff_inf * (acousticBlending - 1));
-        turbulence->alphaEff() = (turbulence->alphaEff() * acousticBlending) - (alphaEff_inf * (acousticBlending - 1));
-    }
+// Correct turbulence fields
+turbulence->correct();
+if (turbulenceDamping == true)
+{
+    turbulence->muEff() = (turbulence->muEff() * acousticBlending) - (muEff_inf * (acousticBlending - 1));
+    turbulence->alphaEff() = (turbulence->alphaEff() * acousticBlending) - (alphaEff_inf * (acousticBlending - 1));
 }
