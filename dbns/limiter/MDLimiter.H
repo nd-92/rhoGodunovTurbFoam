@@ -84,7 +84,7 @@ namespace Foam
         // Constructors
 
         //- Construct from field and gradient field
-        MDLimiter(
+        inline MDLimiter(
             const GeoFieldType &phi,
             const GeoGradFieldType &gradPhi)
             : mesh_(phi.mesh()),

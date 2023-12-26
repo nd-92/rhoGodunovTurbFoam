@@ -39,99 +39,99 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::slauFlux::evaluateFlux(
-    scalar &rhoFlux,
-    vector &rhoUFlux,
-    scalar &rhoEFlux,
-    const scalar &pLeft,
-    const scalar &pRight,
-    const vector &ULeft,
-    const vector &URight,
-    const scalar &TLeft,
-    const scalar &TRight,
-    const scalar &RLeft,
-    const scalar &RRight,
-    const scalar &CvLeft,
-    const scalar &CvRight,
-    const vector &Sf,
-    const scalar &magSf,
-    const scalar &buiEps) const
-{
-    // Step 1: decode rho left and right:
-    const scalar rhoLeft = pLeft / (RLeft * TLeft);
-    const scalar rhoRight = pRight / (RRight * TRight);
+// void Foam::slauFlux::evaluateFlux(
+//     scalar &rhoFlux,
+//     vector &rhoUFlux,
+//     scalar &rhoEFlux,
+//     const scalar &pLeft,
+//     const scalar &pRight,
+//     const vector &ULeft,
+//     const vector &URight,
+//     const scalar &TLeft,
+//     const scalar &TRight,
+//     const scalar &RLeft,
+//     const scalar &RRight,
+//     const scalar &CvLeft,
+//     const scalar &CvRight,
+//     const vector &Sf,
+//     const scalar &magSf,
+//     const scalar &buiEps) const
+// {
+//     // Step 1: decode rho left and right:
+//     const scalar rhoLeft = pLeft / (RLeft * TLeft);
+//     const scalar rhoRight = pRight / (RRight * TRight);
 
-    // Decode left and right total energy:
-    const scalar eLeft = CvLeft * TLeft + 0.5 * magSqr(ULeft);
-    const scalar eRight = CvRight * TRight + 0.5 * magSqr(URight);
+//     // Decode left and right total energy:
+//     const scalar eLeft = CvLeft * TLeft + 0.5 * magSqr(ULeft);
+//     const scalar eRight = CvRight * TRight + 0.5 * magSqr(URight);
 
-    // Adiabatic exponent is constant for ideal gas but if Cp=Cp(T)
-    // it must be computed for each cell and evaluated at each face
-    // through reconstruction
-    const scalar kappaLeft = (CvLeft + RLeft) / CvLeft;
-    const scalar kappaRight = (CvRight + RRight) / CvRight;
+//     // Adiabatic exponent is constant for ideal gas but if Cp=Cp(T)
+//     // it must be computed for each cell and evaluated at each face
+//     // through reconstruction
+//     const scalar kappaLeft = (CvLeft + RLeft) / CvLeft;
+//     const scalar kappaRight = (CvRight + RRight) / CvRight;
 
-    // normal vector
-    const vector normalVector = Sf / magSf;
+//     // normal vector
+//     const vector normalVector = Sf / magSf;
 
-    // Compute left and right contravariant velocities:
-    const scalar contrVLeft = (ULeft & normalVector);
-    const scalar contrVRight = (URight & normalVector);
-    const scalar contrVBar = (rhoLeft * mag(contrVLeft) + rhoRight * mag(contrVRight)) / (rhoLeft + rhoRight);
+//     // Compute left and right contravariant velocities:
+//     const scalar contrVLeft = (ULeft & normalVector);
+//     const scalar contrVRight = (URight & normalVector);
+//     const scalar contrVBar = (rhoLeft * mag(contrVLeft) + rhoRight * mag(contrVRight)) / (rhoLeft + rhoRight);
 
-    // Compute left and right total enthalpies:
-    const scalar hLeft = eLeft + pLeft / rhoLeft;
-    const scalar hRight = eRight + pRight / rhoRight;
+//     // Compute left and right total enthalpies:
+//     const scalar hLeft = eLeft + pLeft / rhoLeft;
+//     const scalar hRight = eRight + pRight / rhoRight;
 
-    // Speed of sound
-    const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
-    const scalar cRight = sqrt(max((kappaRight - 1) * (hRight - 0.5 * magSqr(URight)), SMALL));
-    const scalar cBar = 0.5 * (cLeft + cRight);
+//     // Speed of sound
+//     const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
+//     const scalar cRight = sqrt(max((kappaRight - 1) * (hRight - 0.5 * magSqr(URight)), SMALL));
+//     const scalar cBar = 0.5 * (cLeft + cRight);
 
-    const scalar MaLeft = contrVLeft / cBar;
-    const scalar MaRight = contrVRight / cBar;
-    const scalar g = -max(min(MaLeft, 0.0), -1.0) * min(max(MaRight, 0.0), 1.0);
+//     const scalar MaLeft = contrVLeft / cBar;
+//     const scalar MaRight = contrVRight / cBar;
+//     const scalar g = -max(min(MaLeft, 0.0), -1.0) * min(max(MaRight, 0.0), 1.0);
 
-    const scalar MaArc = min(1.0, 1.0 / cBar * sqrt(max(0.5 * (magSqr(ULeft) + magSqr(URight)), SMALL)));
-    const scalar chi = sqr(1.0 - MaArc);
+//     const scalar MaArc = min(1.0, 1.0 / cBar * sqrt(max(0.5 * (magSqr(ULeft) + magSqr(URight)), SMALL)));
+//     const scalar chi = sqr(1.0 - MaArc);
 
-    const scalar mDot = 0.5 * (1.0 - g) * (rhoLeft * contrVLeft + rhoRight * contrVRight - contrVBar * (rhoRight - rhoLeft)) - 0.5 * chi / cBar * (pRight - pLeft);
+//     const scalar mDot = 0.5 * (1.0 - g) * (rhoLeft * contrVLeft + rhoRight * contrVRight - contrVBar * (rhoRight - rhoLeft)) - 0.5 * chi / cBar * (pRight - pLeft);
 
-    scalar betaLeft = 0.0;
-    scalar betaRight = 0.0;
+//     scalar betaLeft = 0.0;
+//     scalar betaRight = 0.0;
 
-    if (mag(MaLeft) < 1)
-    {
-        betaLeft = 0.25 * (2.0 - MaLeft) * sqr(MaLeft + 1.0);
-    }
-    else
-    {
-        betaLeft = 0.5 * (1.0 + sign(MaLeft));
-    }
+//     if (mag(MaLeft) < 1)
+//     {
+//         betaLeft = 0.25 * (2.0 - MaLeft) * sqr(MaLeft + 1.0);
+//     }
+//     else
+//     {
+//         betaLeft = 0.5 * (1.0 + sign(MaLeft));
+//     }
 
-    if (mag(MaRight) < 1)
-    {
-        betaRight = 0.25 * (2.0 + MaRight) * sqr(MaRight - 1.0);
-    }
-    else
-    {
-        betaRight = 0.5 * (1.0 + sign(-MaRight));
-    }
+//     if (mag(MaRight) < 1)
+//     {
+//         betaRight = 0.25 * (2.0 + MaRight) * sqr(MaRight - 1.0);
+//     }
+//     else
+//     {
+//         betaRight = 0.5 * (1.0 + sign(-MaRight));
+//     }
 
-    const scalar pTilde = 0.5 * (pLeft + pRight) + 0.5 * (betaLeft - betaRight) * (pLeft - pRight) + (1.0 - chi) * (betaLeft + betaRight - 1.0) * 0.5 * (pLeft + pRight);
+//     const scalar pTilde = 0.5 * (pLeft + pRight) + 0.5 * (betaLeft - betaRight) * (pLeft - pRight) + (1.0 - chi) * (betaLeft + betaRight - 1.0) * 0.5 * (pLeft + pRight);
 
-    if (mDot > 0)
-    {
-        rhoFlux = mDot * magSf;
-        rhoUFlux = (mDot * ULeft + normalVector * pTilde) * magSf;
-        rhoEFlux = (mDot * hLeft) * magSf;
-    }
-    else
-    {
-        rhoFlux = mDot * magSf;
-        rhoUFlux = (mDot * URight + normalVector * pTilde) * magSf;
-        rhoEFlux = (mDot * hRight) * magSf;
-    }
-}
+//     if (mDot > 0)
+//     {
+//         rhoFlux = mDot * magSf;
+//         rhoUFlux = (mDot * ULeft + normalVector * pTilde) * magSf;
+//         rhoEFlux = (mDot * hLeft) * magSf;
+//     }
+//     else
+//     {
+//         rhoFlux = mDot * magSf;
+//         rhoUFlux = (mDot * URight + normalVector * pTilde) * magSf;
+//         rhoEFlux = (mDot * hRight) * magSf;
+//     }
+// }
 
 // ************************************************************************* //
