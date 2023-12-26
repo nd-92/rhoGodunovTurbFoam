@@ -49,6 +49,7 @@ Description
 #include "pointFields.H"
 #include "volPointInterpolation.H"
 #include "rungeKutta.H"
+#include "acousticCourantNo.H"
 
 int main(int argc, char *argv[])
 {
@@ -68,12 +69,15 @@ int main(int argc, char *argv[])
     // Runge-Kutta coefficient
     rungeKutta rkCoeffs;
 
+    // Acoustic Courant number CFL control
+    acousticCourantNo Co(U, mesh, thermo, runTime);
+
     // Damping switch
     const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
 
     // Courant number
-    scalar CoNum = 0.0;
-    scalar meanCoNum = 0.0;
+    // scalar CoNum = 0.0;
+    // scalar meanCoNum = 0.0;
 
 #include "createTimeControls.H"
 

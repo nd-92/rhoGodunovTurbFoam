@@ -9,6 +9,7 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
     -I../dbns/lnInclude \
     -I../dbns/rungeKutta \
+    -I../dbns/acousticCourantNo \
     -fwhole-program
 
 EXE_LIBS = \
