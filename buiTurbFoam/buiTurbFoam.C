@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     rungeKutta rkCoeffs;
 
     // Acoustic Courant number CFL control
-    acousticCourantNo Co(U, mesh, thermo, runTime);
+    acousticCourantNo<psiThermo> Co(U, mesh, thermo, runTime);
 
     // Damping switch
     const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));

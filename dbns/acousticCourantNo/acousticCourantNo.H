@@ -49,6 +49,7 @@ namespace Foam
                                Class acousticCourantNo Declaration
     \*---------------------------------------------------------------------------*/
 
+    template <class Thermo>
     class acousticCourantNo
     {
     public:
@@ -56,7 +57,7 @@ namespace Foam
         inline acousticCourantNo(
             const volVectorField &U,
             const fvMesh &mesh,
-            const psiThermo &thermo,
+            const Thermo &thermo,
             Time &runTime)
             : U_(U),
               mesh_(mesh),
@@ -109,9 +110,16 @@ namespace Foam
         }
 
     private:
+        // Velocity field
         const volVectorField &U_;
+
+        // Mesh
         const fvMesh &mesh_;
-        const psiThermo &thermo_;
+
+        // Thermo model
+        const Thermo &thermo_;
+
+        // Runtime
         Time &runTime_;
         surfaceScalarField amaxSf_;
         scalarField sumAmaxSf_;
