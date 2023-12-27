@@ -2,8 +2,8 @@
 wclean dbns
 wclean buiTurbFoam
 wclean buiTurbFoamHEqn
-wclean implicitGodunovFoam
+wclean rhoGodunovTurbFoam
 wmake dbns
 wmake buiTurbFoam
 wmake buiTurbFoamHEqn
-wmake implicitGodunovFoam
+wmake rhoGodunovTurbFoam

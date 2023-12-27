@@ -25,13 +25,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    buiTurbFoam
+    rhoGodunovTurbFoam
 
 Description
-    Density-based compressible transient solver using the flux difference
-    splitting scheme of Bui and Runge Kutta 4-stage time integration.
-    Primarily designed for LES, and with optional absorption-based acoustic
-    damping
+    Implicit density-based compressible transient solver using the flux
+    difference splitting scheme of Bui. Primarily designed for LES.
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,10 +53,8 @@ int main(int argc, char *argv[])
 {
 
     argList::addNote(
-        "Density-based compressible transient solver using the flux"
-        " difference splitting scheme of Bui and Runge Kutta 4-stage"
-        " time integration.  Primarily designed for LES, and with"
-        " optional absorption-based acoustic damping.");
+        "Implicit density-based compressible transient solver using the flux"
+        "difference splitting scheme of Bui. Primarily designed for LES.");
 
 #include "postProcess.H"
 #include "setRootCase.H"
@@ -79,7 +75,7 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         // Execute main solver loop
-#include "implicitGodunovFoam.H"
+#include "rhoGodunovTurbFoam.H"
 
         // Write runtime output
         runTime.write();
