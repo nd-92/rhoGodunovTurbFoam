@@ -75,10 +75,6 @@ int main(int argc, char *argv[])
     // Damping switch
     const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
 
-    // Courant number
-    // scalar CoNum = 0.0;
-    // scalar meanCoNum = 0.0;
-
 #include "createTimeControls.H"
 
     Info << "Starting time loop" << endl;

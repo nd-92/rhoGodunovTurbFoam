@@ -67,51 +67,28 @@ int main(int argc, char *argv[])
 #include "createFields.H"
 
     // Runge-Kutta coefficient
-    rungeKutta rkCoeffs;
+    // rungeKutta rkCoeffs;
 
     // Acoustic Courant number CFL control
     acousticCourantNo Co(U, mesh, thermo, runTime);
-
-    // Damping switch
-    const bool applyDamping = readBool(runTime.controlDict().lookup("applyDamping"));
 
 #include "createTimeControls.H"
 
     Info << "Starting time loop" << endl;
 
-    if (applyDamping == true)
+    while (runTime.run())
     {
-#include "dampingFieldsHEqn.H"
-        while (runTime.run())
-        {
-            // Execute main solver loop
-#include "buiTurbFoamHEqnDamping.H"
+        // Execute main solver loop
+#include "implicitGodunovFoam.H"
 
-            // Write runtime output
-            runTime.write();
-            runTime.printExecutionTime(Info);
-        }
-
-        Info << "End" << endl;
-
-        return 0;
+        // Write runtime output
+        runTime.write();
+        runTime.printExecutionTime(Info);
     }
-    else
-    {
-        while (runTime.run())
-        {
-            // Execute main solver loop
-#include "buiTurbFoamHEqn.H"
 
-            // Write runtime output
-            runTime.write();
-            runTime.printExecutionTime(Info);
-        }
+    Info << "End" << endl;
 
-        Info << "End" << endl;
-
-        return 0;
-    }
+    return 0;
 }
 
 // ************************************************************************* //
