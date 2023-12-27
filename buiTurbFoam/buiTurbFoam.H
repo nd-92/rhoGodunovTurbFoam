@@ -11,19 +11,15 @@ rkLoop(i)
     // Solve the approximate Riemann problem for this time step
     dbnsFlux.computeFlux();
 
-    // Assemble and solve the density equation
-    solve(                                   //
-        1 / rkCoeffs.beta(i) * fvm::ddt(rho) //
-        + fvc::div(dbnsFlux.rhoFlux()));     //
-
-    // Assemble and solve the momentum equation
-    solve(                                                              //
-        1 / rkCoeffs.beta(i) * fvm::ddt(rhoU)                           //
-        + fvc::div(dbnsFlux.rhoUFlux())                                 //
-        - fvc::laplacian(turbulence->muEff(), U)                        //
-        - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))); //
-
-    // Assemble and solve the energy equation
+    // Time integration
+    solve(                                                                                                                                                                                            //
+        1 / rkCoeffs.beta(i) * fvm::ddt(rho)                                                                                                                                                          //
+        + fvc::div(dbnsFlux.rhoFlux()));                                                                                                                                                              //
+    solve(                                                                                                                                                                                            //
+        1 / rkCoeffs.beta(i) * fvm::ddt(rhoU)                                                                                                                                                         //
+        + fvc::div(dbnsFlux.rhoUFlux())                                                                                                                                                               //
+        - fvc::laplacian(turbulence->muEff(), U)                                                                                                                                                      //
+        - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U)))));                                                                                                                               //
     solve(                                                                                                                                                                                            //
         1 / rkCoeffs.beta(i) * fvm::ddt(rhoE)                                                                                                                                                         //
         + fvc::div(dbnsFlux.rhoEFlux())                                                                                                                                                               //
@@ -36,19 +32,18 @@ rkLoop(i)
     rhoU.boundaryFieldRef() == rho.boundaryField() * U.boundaryField();
 
     // Calculate internal energy
-    // e = (rhoE / rho) - (0.5 * magSqr(U));
-    e = (rhoE / rho) - (0.5 * magSqr(U)) - turbulence->k();
+    e = ((rhoE / rho) - (0.5 * magSqr(U)));
     e.correctBoundaryConditions();
 
     // Correct thermodynamics
     thermo.correct();
-    rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + 0.5 * magSqr(U.boundaryField()) + turbulence->k().boundaryField());
+    rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + 0.5 * magSqr(U.boundaryField()));
 
     // Compute p from rho
     p.ref() = rho() / thermo.psi();
     p.correctBoundaryConditions();
     rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
-}
 
-// Correct turbulence fields
-turbulence->correct();
+    // Correct turbulence fields
+    turbulence->correct();
+}

@@ -1,6 +1,6 @@
 #include "readTimeControls.H"
-#include "acousticCourantNo.H"
-#include "setDeltaT.H"
+Co.calculate();
+Co.setDeltaT(maxDeltaT, maxCo, adjustTimeStep);
 
 runTime++;
 Info << "\nTime = " << runTime.value() << "\n";
@@ -12,16 +12,14 @@ rkLoop(i)
     dbnsFlux.computeFlux();
 
     // Time integration
-    solve(                                   //
-        1 / rkCoeffs.beta(i) * fvm::ddt(rho) //
-        + fvc::div(dbnsFlux.rhoFlux()));     //
-
-    solve(                                     //
-        1 / rkCoeffs.beta(i) * fvm::ddt(rhoU)  //
-        + fvc::div(dbnsFlux.rhoUFlux())        //
-        + fvc::div(turbulence->devRhoReff())); //
-
-    solve(
+    solve(                                            //
+        1 / rkCoeffs.beta(i) * fvm::ddt(rho)          //
+        + fvc::div(dbnsFlux.rhoFlux()));              //
+    solve(                                            //
+        1 / rkCoeffs.beta(i) * fvm::ddt(rhoU)         //
+        + fvc::div(dbnsFlux.rhoUFlux())               //
+        + fvc::div(turbulence->devRhoReff()));        //
+    solve(                                            //
         1.0 / rkCoeffs.beta(i) * fvm::ddt(rhoE)       //
         + fvc::div(dbnsFlux.rhoEFlux())               //
         + fvc::div(turbulence->devRhoReff() & U)      //
