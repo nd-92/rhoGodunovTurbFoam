@@ -62,6 +62,24 @@ int main(int argc, char *argv[])
 #include "createMesh.H"
 #include "createFields.H"
 
+    // Numeric flux
+    autoPtr<basicNumericFlux> dbnsFluxPtr = basicNumericFlux::New(
+        thermo.p(),
+        U,
+        thermo.T(),
+        upwindingFactor,
+        thermo);
+    basicNumericFlux &dbnsFlux = dbnsFluxPtr();
+
+    // Turbulence fields
+    Info << "Creating turbulence model" << endl;
+    autoPtr<compressible::turbulenceModel> turbulence(
+        compressible::turbulenceModel::New(
+            rho,
+            U,
+            fvc::flux(rhoU),
+            thermo));
+
     // Runge-Kutta coefficient
     // rungeKutta rkCoeffs;
 

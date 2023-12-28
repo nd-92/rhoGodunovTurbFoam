@@ -2,10 +2,7 @@
 Info << "Reading thermophysical properties" << endl;
 autoPtr<psiThermo> pThermo(psiThermo::New(mesh));
 psiThermo &thermo = pThermo();
-// thermo.validate(args.executable(), "h");
 volScalarField &e = thermo.he();
-volScalarField &p = thermo.p();
-volScalarField &T = thermo.T();
 
 // Momentum fields
 Info << "Reading fields rho, U, rho * U, rho * E" << endl;
@@ -56,22 +53,3 @@ const volScalarField upwindingFactor(
         "one",
         dimless,
         1));
-
-// Numeric flux
-autoPtr<basicNumericFlux> dbnsFluxPtr = basicNumericFlux::New(
-    p,
-    U,
-    T,
-    upwindingFactor,
-    thermo);
-basicNumericFlux &dbnsFlux = dbnsFluxPtr();
-const surfaceScalarField &phi = dbnsFlux.rhoFlux();
-
-// Turbulence fields
-Info << "Creating turbulence model" << endl;
-autoPtr<compressible::turbulenceModel> turbulence(
-    compressible::turbulenceModel::New(
-        rho,
-        U,
-        phi,
-        thermo));

@@ -40,9 +40,9 @@ thermo.correct();
 
 // Finish time step
 rhoE = rho * (e + (0.5 * magSqr(U)));
-p.ref() = rho() / thermo.psi();
-p.correctBoundaryConditions();
-rho.boundaryFieldRef() == thermo.psi().boundaryField() * p.boundaryField();
+thermo.p().ref() = rho() / thermo.psi();
+thermo.p().correctBoundaryConditions();
+rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
 
 // Update turbulence fields
 turbulence->correct();
