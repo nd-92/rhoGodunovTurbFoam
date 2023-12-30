@@ -54,7 +54,7 @@ Foam::numericFlux<Flux, Limiter>::numericFlux(
               this->mesh(),
               IOobject::NO_READ,
               IOobject::NO_WRITE),
-          (fvc::interpolate(thermo_.rho() * U_) & this->mesh().Sf())),
+          (linearInterpolate(thermo_.rho() * U_) & this->mesh().Sf())),
       rhoUFlux_(
           IOobject(
               "rhoUFlux",
@@ -62,7 +62,7 @@ Foam::numericFlux<Flux, Limiter>::numericFlux(
               this->mesh(),
               IOobject::NO_READ,
               IOobject::NO_WRITE),
-          rhoFlux_ * fvc::interpolate(U_)),
+          rhoFlux_ * linearInterpolate(U_)),
       rhoEFlux_(
           IOobject(
               "rhoEFlux",
@@ -70,7 +70,7 @@ Foam::numericFlux<Flux, Limiter>::numericFlux(
               this->mesh(),
               IOobject::NO_READ,
               IOobject::NO_WRITE),
-          rhoFlux_ * fvc::interpolate(thermo.Cv() * T_ + 0.5 * magSqr(U_))),
+          rhoFlux_ * linearInterpolate(thermo.Cv() * T_ + 0.5 * magSqr(U_))),
       gradP(fvc::grad(p_)),
       gradU(fvc::grad(U_)),
       gradT(fvc::grad(T_))

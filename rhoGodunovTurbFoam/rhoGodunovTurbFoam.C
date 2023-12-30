@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         upwindingFactor,
         thermo);
     basicNumericFlux &dbnsFlux = dbnsFluxPtr();
-    // surfaceScalarField phi("phi", fvc::flux(rhoU));
+    const surfaceScalarField &phi = dbnsFlux.rhoFlux();
 
     // Turbulence fields
     Info << "Creating turbulence model" << endl;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
         compressible::turbulenceModel::New(
             rho,
             U,
-            dbnsFlux.rhoFlux(),
+            phi,
             thermo));
 
     // Runge-Kutta coefficient
