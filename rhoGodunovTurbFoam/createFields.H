@@ -53,3 +53,28 @@ const volScalarField upwindingFactor(
         "one",
         dimless,
         1));
+
+// Numeric flux
+autoPtr<basicNumericFlux> dbnsFluxPtr = basicNumericFlux::New(
+    thermo.p(),
+    U,
+    thermo.T(),
+    upwindingFactor,
+    thermo);
+basicNumericFlux &dbnsFlux = dbnsFluxPtr();
+const surfaceScalarField &phi = dbnsFlux.rhoFlux();
+
+// Turbulence fields
+Info << "Creating turbulence model" << endl;
+autoPtr<compressible::turbulenceModel> turbulence(
+    compressible::turbulenceModel::New(
+        rho,
+        U,
+        phi,
+        thermo));
+
+// Runge-Kutta coefficient
+// rungeKutta rkCoeffs;
+
+// Acoustic Courant number CFL control
+acousticCourantNo<psiThermo> Co(U, mesh, thermo, runTime);
