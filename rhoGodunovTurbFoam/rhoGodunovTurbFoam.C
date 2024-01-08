@@ -28,8 +28,8 @@ Application
     rhoGodunovTurbFoam
 
 Description
-    Implicit density-based compressible transient solver using the flux
-    difference splitting scheme of Bui. Primarily designed for LES.
+    Density-based compressible transient solver using the flux difference
+    splitting scheme of Bui. Primarily designed for LES.
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
 {
 
     argList::addNote(
-        "Implicit density-based compressible transient solver using the flux"
-        "difference splitting scheme of Bui. Primarily designed for LES.");
+        "Density-based compressible transient solver using the flux difference"
+        "splitting scheme of Bui. Primarily designed for LES.");
 
 #include "postProcess.H"
 #include "setRootCase.H"
