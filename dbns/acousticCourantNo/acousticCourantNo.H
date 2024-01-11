@@ -45,8 +45,65 @@ SourceFiles
 namespace Foam
 {
 
+    // Helper function to return minimum cell dimension
+    inline const volScalarField minDeltaxyz(
+        const fvMesh &mesh,
+        const Time &runTime)
+    {
+
+        // Initialise the volScalarField
+        volScalarField cellDim(
+            IOobject(
+                "cellDim",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE),
+            mesh,
+            dimensionedScalar(
+                "one",
+                dimLength,
+                1));
+
+        const cellList &cells = mesh.cells();
+        const vectorField &cellC = mesh.cellCentres();
+        const vectorField &faceC = mesh.faceCentres();
+        const vectorField faceN(mesh.faceAreas() / mag(mesh.faceAreas()));
+
+        // Loop over all cells
+        forAll(cells, celli)
+        {
+            // Initial guess of distance from cell centroid to face 0
+            scalar deltaMaxTmp = mag(faceN[0] & (faceC[0] - cellC[celli]));
+            const labelList &cFaces = cells[celli];
+            const point &cc = cellC[celli];
+
+            // Loop over faces of cell
+            forAll(cFaces, cFacei)
+            {
+                const label facei = cFaces[cFacei];
+                const point &fc = faceC[facei];
+                const vector &n = faceN[facei];
+
+                // Distance from face to cell centroids
+                const scalar tmp = mag(n & (fc - cc));
+
+                // Assign min value
+                if (tmp < deltaMaxTmp)
+                {
+                    deltaMaxTmp = tmp;
+                }
+            }
+
+            // Cell dimension is 2 * distance from cell centroid to face centroid
+            cellDim[celli] = 2 * deltaMaxTmp;
+        }
+
+        return cellDim;
+    };
+
     /*---------------------------------------------------------------------------*\
-                               Class acousticCourantNo Declaration
+                            Class acousticCourantNo Declaration
     \*---------------------------------------------------------------------------*/
 
     template <class Thermo>
@@ -63,10 +120,11 @@ namespace Foam
               mesh_(mesh),
               thermo_(thermo),
               runTime_(runTime),
-              amaxSf_(0.5 * (mag((fvc::interpolate(U_) & mesh_.Sf())) + (fvc::interpolate(sqrt(thermo_.gamma() * (thermo_.Cp() - thermo_.Cv()) * thermo_.T())) * mesh_.magSf()))),
-              sumAmaxSf_(fvc::surfaceSum(amaxSf_)().primitiveField()),
-              CoNum_(0),
-              meanCoNum_(0)
+              cellDim_(minDeltaxyz(mesh_, runTime_)),
+              fc_((mag(U_) + sqrt(thermo_.gamma() * (thermo_.Cp() - thermo_.Cv()) * thermo_.T())) / cellDim_),
+              nCells_(static_cast<scalar>(mesh_.nCells())),
+              CoNum_(gMax(fc_) * runTime_.deltaTValue()),
+              meanCoNum_(gSum(fc_) * runTime_.deltaTValue() / nCells_)
         {
             // Only need to evaluate this once at construction time
             // Avoid evaluation every time update is called
@@ -82,10 +140,16 @@ namespace Foam
         // Calculate and print acoustic Courant number
         inline void calculate()
         {
-            amaxSf_ = 0.5 * (mag((fvc::interpolate(U_) & mesh_.Sf())) + (fvc::interpolate(sqrt(thermo_.gamma() * (thermo_.Cp() - thermo_.Cv()) * thermo_.T())) * mesh_.magSf()));
-            sumAmaxSf_ = fvc::surfaceSum(amaxSf_)().primitiveField();
-            CoNum_ = 0.5 * gMax(sumAmaxSf_ / mesh_.V().field()) * runTime_.deltaTValue();
-            meanCoNum_ = 0.5 * (gSum(sumAmaxSf_) / gSum(mesh_.V().field())) * runTime_.deltaTValue();
+            // Calculate acoustic frequency
+            fc_ = (mag(U_) + sqrt(thermo_.gamma() * (thermo_.Cp() - thermo_.Cv()) * thermo_.T())) / cellDim_;
+
+            // Get max Courant number
+            CoNum_ = gMax(fc_) * runTime_.deltaTValue();
+
+            // Get mean Courant number
+            meanCoNum_ = gSum(fc_) * runTime_.deltaTValue() / nCells_;
+
+            // Output
             Info << "Mean and max acoustic Courant Numbers = " << meanCoNum_ << " " << CoNum_ << endl;
         };
 
@@ -110,23 +174,32 @@ namespace Foam
         }
 
     private:
-        // Velocity field
+        // Const access to velocity field
         const volVectorField &U_;
 
-        // Mesh
+        // Const access to mesh
         const fvMesh &mesh_;
 
-        // Thermo model
+        // Const access to thermo
         const Thermo &thermo_;
 
-        // Runtime
+        // Non-const access to runTime
         Time &runTime_;
-        surfaceScalarField amaxSf_;
-        scalarField sumAmaxSf_;
-        scalar CoNum_;
-        scalar meanCoNum_;
 
-        // scalar deltaxyz_[3];
+        // Mesh cell dimension
+        const volScalarField cellDim_;
+
+        // Cell acoustic frequency
+        volScalarField fc_;
+
+        // Scalar number of mesh cells
+        const scalar nCells_;
+
+        // Max Courant number
+        scalar CoNum_;
+
+        // Mean Courant number
+        scalar meanCoNum_;
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
