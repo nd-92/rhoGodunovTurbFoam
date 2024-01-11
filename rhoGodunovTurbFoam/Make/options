@@ -20,5 +20,7 @@ EXE_LIBS = \
     -lcompressibleTransportModels \
     -lturbulenceModels \
     -lthermoTools \
+    -lturbulenceModelSchemes \
+    -lpetscFoam \
     -L$(FOAM_USER_LIBBIN) -ldbns
     
