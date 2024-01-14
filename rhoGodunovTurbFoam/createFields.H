@@ -74,16 +74,22 @@ autoPtr<compressible::turbulenceModel> turbulence(
         thermo));
 
 // LES delta
-if (mesh.objectRegistry::foundObject<volScalarField>("delta"))
+volScalarField LESdelta(
+    IOobject(
+        "LESdelta",
+        runTime.timeName(),
+        mesh,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE),
+    mesh,
+    dimensionedScalar("LESdelta", dimLength, 0));
+
+if (mesh.objectRegistry::foundObject<volScalarField>("delta") == true)
 {
-    const volScalarField LESdelta(
-        IOobject(
-            "LESdelta",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE),
-        mesh.objectRegistry::lookupObject<volScalarField>("delta"));
+    const volScalarField &delta = mesh.objectRegistry::lookupObject<volScalarField>("delta");
+
+    LESdelta.internalFieldRef() = delta.internalField();
+    LESdelta.boundaryFieldRef() = delta.boundaryField();
 }
 
 // Runge-Kutta coefficient
