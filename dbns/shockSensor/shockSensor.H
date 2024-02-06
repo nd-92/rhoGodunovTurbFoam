@@ -85,11 +85,7 @@ namespace Foam
         const Time &runTime,
         const volScalarField filterWidth)
     {
-        const dimensionedScalar dt_("dt_", dimensionSet(0, 0, 1, 0, 0), mesh.time().deltaTValue());
-
-        const volScalarField DT_ = sqr(filterWidth) / dt_;
-
-        return DT_;
+        return sqr(filterWidth) / dimensionedScalar("dt_", dimensionSet(0, 0, 1, 0, 0), mesh.time().deltaTValue());
     };
 
     // Helper function to construct smoothing switch
