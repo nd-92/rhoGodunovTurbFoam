@@ -37,8 +37,7 @@ Foam::autoPtr<Foam::basicNumericFlux> Foam::basicNumericFlux::New(
     const volScalarField &upwindingFactor,
     const basicThermo &thermo)
 {
-    const dictionary &subDict =
-        p.mesh().schemesDict().subDict("divSchemes").subDict("dbns");
+    const dictionary &subDict = p.mesh().schemesDict().subDict("divSchemes").subDict("dbns");
 
     const word name = word(subDict.lookup("flux")) + "Flux" + word(subDict.lookup("limiter")) + "Limiter";
 

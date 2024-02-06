@@ -48,6 +48,7 @@ Description
 #include "volPointInterpolation.H"
 #include "rungeKutta.H"
 #include "acousticCourantNo.H"
+#include "shockSensor.H"
 
 int main(int argc, char *argv[])
 {

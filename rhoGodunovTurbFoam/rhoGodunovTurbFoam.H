@@ -46,3 +46,7 @@ rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryFiel
 
 // Update turbulence fields
 turbulence->correct();
+
+// Update the shock sensor
+shockDetector.update();
+shockDetector.smoothen();

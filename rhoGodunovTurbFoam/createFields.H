@@ -39,27 +39,30 @@ volScalarField rhoE(
         IOobject::NO_WRITE),
     thermo.rho() * (e + 0.5 * magSqr(U)));
 
-// Upwinding factor
-Info << "Reading field upwindingFactor" << endl;
-const volScalarField upwindingFactor(
-    IOobject(
-        "upwindingFactor",
-        runTime.timeName(),
-        mesh,
-        IOobject::READ_IF_PRESENT,
-        IOobject::AUTO_WRITE),
-    mesh,
-    dimensionedScalar(
-        "one",
-        dimless,
-        1));
+// // Upwinding factor
+// Info << "Reading field upwindingFactor" << endl;
+// const volScalarField upwindingFactor(
+//     IOobject(
+//         "upwindingFactor",
+//         runTime.timeName(),
+//         mesh,
+//         IOobject::READ_IF_PRESENT,
+//         IOobject::AUTO_WRITE),
+//     mesh,
+//     dimensionedScalar(
+//         "one",
+//         dimless,
+//         1));
+
+// Density gradient-based shock sensor
+shockSensor<psiThermo> shockDetector(U, mesh, thermo, runTime);
 
 // Numeric flux
 autoPtr<basicNumericFlux> dbnsFluxPtr = basicNumericFlux::New(
     thermo.p(),
     U,
     thermo.T(),
-    upwindingFactor,
+    shockDetector.upwindingFactor(),
     thermo);
 basicNumericFlux &dbnsFlux = dbnsFluxPtr();
 const surfaceScalarField &phi = dbnsFlux.rhoFlux();

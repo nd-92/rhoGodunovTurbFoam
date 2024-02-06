@@ -38,8 +38,6 @@ SourceFiles
 #ifndef rungeKutta_H
 #define rungeKutta_H
 
-#include "fvCFD.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

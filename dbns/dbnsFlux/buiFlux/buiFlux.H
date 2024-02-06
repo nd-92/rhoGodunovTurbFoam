@@ -64,23 +64,6 @@ namespace Foam
         // Member Functions
 
         //- Update fluxes based on current left and right states
-        // void evaluateFlux(
-        //     scalar &rhoFlux,
-        //     vector &rhoUFlux,
-        //     scalar &rhoEFlux,
-        //     const scalar &pLeft,
-        //     const scalar &pRight,
-        //     const vector &ULeft,
-        //     const vector &URight,
-        //     const scalar &TLeft,
-        //     const scalar &TRight,
-        //     const scalar &RLeft,
-        //     const scalar &RRight,
-        //     const scalar &CvLeft,
-        //     const scalar &CvRight,
-        //     const vector &Sf,
-        //     const scalar &magSf,
-        //     const scalar &buiEps) const;
 
         inline void evaluateFlux(
             scalar &rhoFlux,
