@@ -46,13 +46,11 @@ namespace Foam
 {
 
     // Helper function to construct the local shock sensor filter length
-    const volScalarField localFilterWidth(
+    inline const volScalarField localFilterWidth(
         const fvMesh &mesh,
         const Time &runTime)
     {
         const scalar filterScale = mesh.schemesDict().subDict("divSchemes").subDict("dbns").lookupOrDefault("shockFilter", 1.0);
-
-        Info << "Initialised shock sensor with local filter with scale = " << filterScale << " : 1" << endl;
 
         volScalarField filterWidth(
             IOobject(
@@ -82,7 +80,7 @@ namespace Foam
     };
 
     // Helper function to construct local shock sensor DT
-    const volScalarField localFilterDT(
+    inline const volScalarField localFilterDT(
         const fvMesh &mesh,
         const Time &runTime,
         const volScalarField filterWidth)
@@ -92,6 +90,22 @@ namespace Foam
         const volScalarField DT_ = sqr(filterWidth) / dt_;
 
         return DT_;
+    };
+
+    // Helper function to construct smoothing switch
+    inline bool isSmoothing(
+        const fvMesh &mesh)
+    {
+        const scalar filterScale = mesh.schemesDict().subDict("divSchemes").subDict("dbns").lookupOrDefault("shockFilter", 1.0);
+        if (filterScale > 0)
+        {
+            Info << "Initialised shock sensor with local filter with scale = " << filterScale << " : 1" << endl;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     };
 
     /*---------------------------------------------------------------------------*\
@@ -130,7 +144,8 @@ namespace Foam
                       IOobject::NO_READ,
                       IOobject::NO_WRITE),
                   mag(fvc::grad(thermo_.rho())) / max(mag(fvc::grad(thermo_.rho()))),
-                  fixedValueFvPatchScalarField::typeName){};
+                  fixedValueFvPatchScalarField::typeName),
+              applySmoothing_(isSmoothing(mesh)){};
 
         // Destructor
         inline ~shockSensor(){};
@@ -144,22 +159,25 @@ namespace Foam
         // Smoothen the shock sensor by solving the Laplace equation in pseudo-time
         inline void smoothen()
         {
-            // Create scalar smooth field from virgin scalar smooth field template
-            volScalarField &sensorSmoother = sensorSmoother_;
-            sensorSmoother == shockSensor_;
-            sensorSmoother.correctBoundaryConditions();
-            sensorSmoother.oldTime() = shockSensor_;
-            sensorSmoother.oldTime().correctBoundaryConditions();
+            if (applySmoothing_)
+            {
+                // Create scalar smooth field from virgin scalar smooth field template
+                volScalarField &sensorSmoother = sensorSmoother_;
+                sensorSmoother == shockSensor_;
+                sensorSmoother.correctBoundaryConditions();
+                sensorSmoother.oldTime() = shockSensor_;
+                sensorSmoother.oldTime().correctBoundaryConditions();
 
-            // Laplacian smoothing
-            solve(fvm::ddt(sensorSmoother) - fvm::laplacian(DT_, sensorSmoother));
+                // Laplacian smoothing
+                solve(fvm::ddt(sensorSmoother) - fvm::laplacian(DT_, sensorSmoother));
 
-            // Assign smoothened values
-            shockSensor_ = sensorSmoother;
-            shockSensor_.correctBoundaryConditions();
+                // Assign smoothened values
+                shockSensor_ = sensorSmoother;
+                shockSensor_.correctBoundaryConditions();
 
-            // Clamp to a range of 0 to 1
-            shockSensor_ = (shockSensor_ - min(shockSensor_)) / (max(shockSensor_) - min(shockSensor_));
+                // Clamp to a range of 0 to 1
+                shockSensor_ = (shockSensor_ - min(shockSensor_)) / (max(shockSensor_) - min(shockSensor_));
+            }
         };
 
         // Public const access to the shock sensor
@@ -190,6 +208,9 @@ namespace Foam
 
         // Virgin smoother field
         volScalarField sensorSmoother_;
+
+        // Determine whether or not to apply Laplacian smoothing
+        const bool applySmoothing_;
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
