@@ -44,9 +44,8 @@ SourceFiles
 
 namespace Foam
 {
-
-    // Helper function to construct the local shock sensor filter length
-    inline const volScalarField localFilterWidth(
+    // Helper function to construct local shock sensor DT
+    inline const volScalarField localFilterDT(
         const fvMesh &mesh,
         const Time &runTime)
     {
@@ -76,15 +75,6 @@ namespace Foam
             filterWidthBf[patchi] = sqrt(mesh.magSf().boundaryField()[patchi]) * filterScale;
         }
 
-        return filterWidth;
-    };
-
-    // Helper function to construct local shock sensor DT
-    inline const volScalarField localFilterDT(
-        const fvMesh &mesh,
-        const Time &runTime,
-        const volScalarField filterWidth)
-    {
         return sqr(filterWidth) / dimensionedScalar("dt_", dimensionSet(0, 0, 1, 0, 0), mesh.time().deltaTValue());
     };
 
@@ -130,8 +120,7 @@ namespace Foam
                       IOobject::NO_READ,
                       IOobject::AUTO_WRITE),
                   mag(fvc::grad(thermo_.rho())) / max(mag(fvc::grad(thermo_.rho())))),
-              smoothingLength_(localFilterWidth(mesh_, runTime_)),
-              DT_(localFilterDT(mesh_, runTime_, smoothingLength_)),
+              DT_(localFilterDT(mesh_, runTime_)),
               sensorSmoother_(
                   IOobject(
                       "epsilonSmoother",
@@ -199,7 +188,7 @@ namespace Foam
         volScalarField shockSensor_;
 
         // Laplacian smoothing length and time
-        const volScalarField smoothingLength_;
+        // const volScalarField smoothingLength_;
         const volScalarField DT_;
 
         // Virgin smoother field
