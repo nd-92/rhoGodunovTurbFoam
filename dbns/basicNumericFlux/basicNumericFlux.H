@@ -72,10 +72,10 @@ namespace Foam
             : mesh_(mesh){};
 
         // Destructor
-        virtual inline ~basicNumericFlux(){};
+        inline virtual ~basicNumericFlux(){};
 
         //- Runtime type information
-        TypeName("basicNumericFlux");
+        inline TypeName("basicNumericFlux");
 
         //- Declare run-time constructor selection table
 
@@ -94,17 +94,37 @@ namespace Foam
 #endif
 
         //- Selector
-        static autoPtr<basicNumericFlux> New(
+        inline static autoPtr<basicNumericFlux> New(
             const volScalarField &p,
             const volVectorField &U,
             const volScalarField &T,
             const volScalarField &upwindingFactor,
-            const basicThermo &thermo);
+            const basicThermo &thermo)
+        {
+            const dictionary &subDict = p.mesh().schemesDict().subDict("divSchemes").subDict("dbns");
+
+            const word name = word(subDict.lookup("flux")) + "Flux" + word(subDict.lookup("limiter")) + "Limiter";
+
+            Info << "Selecting numericFlux " << name << endl;
+
+            auto *ctorPtr = stateConstructorTable(name);
+
+            if (!ctorPtr)
+            {
+                FatalErrorIn("basicNumericFlux::New(const fvMesh&)")
+                    << "Unknown basicNumericFlux type " << name << nl << nl
+                    << "Valid basicNumericFlux types are:" << nl
+                    << stateConstructorTablePtr_->sortedToc() << nl
+                    << exit(FatalError);
+            }
+
+            return autoPtr<basicNumericFlux>(ctorPtr(p, U, T, upwindingFactor, thermo));
+        }
 
         // Member functions
 
         //- Return mesh reference
-        const fvMesh &mesh() const
+        inline const fvMesh &mesh() const
         {
             return mesh_;
         }
@@ -112,23 +132,29 @@ namespace Foam
         // Return fluxes
 
         //- Return density flux
-        virtual const surfaceScalarField &rhoFlux() const = 0;
+        inline virtual const surfaceScalarField &rhoFlux() const = 0;
 
         //- Return velocity flux
-        virtual const surfaceVectorField &rhoUFlux() const = 0;
+        inline virtual const surfaceVectorField &rhoUFlux() const = 0;
 
         //- Return energy flux
-        virtual const surfaceScalarField &rhoEFlux() const = 0;
+        inline virtual const surfaceScalarField &rhoEFlux() const = 0;
 
         // Update fluxes based on current state
 
         //- Compute flux
-        virtual void computeFlux() = 0;
+        inline virtual void computeFlux() = 0;
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+namespace Foam
+{
+    defineTypeNameAndDebug(basicNumericFlux, 0);
+    defineRunTimeSelectionTable(basicNumericFlux, state);
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -49,6 +49,7 @@ Description
 #include "rungeKutta.H"
 #include "acousticCourantNo.H"
 #include "shockSensor.H"
+#include "numericFluxes.H"
 
 bool readSolutionApproach(const fvMesh &mesh)
 {

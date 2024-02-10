@@ -7,9 +7,16 @@ EXE_INC = \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
     -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
-    -I../dbns/lnInclude \
-    -I../dbns/rungeKutta \
     -I../dbns/acousticCourantNo \
+    -I../dbns/basicNumericFlux \
+    -I../dbns/dbnsFlux \
+    -I../dbns/dbnsFlux/buiFlux \
+    -I../dbns/dbnsFlux/slau2Flux \
+    -I../dbns/dbnsFlux/slauFlux \
+    -I../dbns/limiter \
+    -I../dbns/numericFlux \
+    -I../dbns/rungeKutta \
+    -I../dbns/shockSensor \
     -fwhole-program
 
 EXE_LIBS = \
@@ -19,6 +26,5 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModels \
     -lcompressibleTransportModels \
     -lturbulenceModels \
-    -lthermoTools \
-    -L$(FOAM_USER_LIBBIN) -ldbns
+    -lthermoTools
     

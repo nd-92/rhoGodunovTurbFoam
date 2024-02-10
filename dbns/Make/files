@@ -1,5 +1,0 @@
-basicNumericFlux/basicNumericFlux.C
-basicNumericFlux/newBasicNumericFlux.C
-numericFlux/numericFluxes.C
-
-LIB = $(FOAM_USER_LIBBIN)/libdbns

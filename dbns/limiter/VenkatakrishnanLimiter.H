@@ -59,7 +59,7 @@ namespace Foam
         // Constructor
 
         //- Construct null
-        VenkatakrishnanLimiter()
+        inline VenkatakrishnanLimiter()
         {
         }
 

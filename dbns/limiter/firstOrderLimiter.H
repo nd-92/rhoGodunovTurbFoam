@@ -55,7 +55,7 @@ namespace Foam
         // Constructor
 
         //- Construct null
-        firstOrderLimiter()
+        inline firstOrderLimiter()
         {
         }
 

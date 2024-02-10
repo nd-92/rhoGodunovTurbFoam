@@ -55,7 +55,7 @@ namespace Foam
         // Constructors
 
         //- Construct null
-        slau2Flux()
+        inline slau2Flux()
         {
         }
 

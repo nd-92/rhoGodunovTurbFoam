@@ -65,13 +65,13 @@ namespace Foam
         // Constructors
 
         //- Construct from mesh
-        numericFluxBase(const fvMesh &mesh)
+        inline numericFluxBase(const fvMesh &mesh)
             : basicNumericFlux(mesh)
         {
         }
 
         //- Destructor
-        virtual ~numericFluxBase()
+        inline virtual ~numericFluxBase()
         {
         }
     };

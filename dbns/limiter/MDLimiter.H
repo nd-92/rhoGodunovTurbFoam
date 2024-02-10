@@ -51,9 +51,7 @@ namespace Foam
                               Class MDLimiter Declaration
     \*---------------------------------------------------------------------------*/
 
-    template <
-        class Type,
-        typename LimiterFunctionType>
+    template <class Type, typename LimiterFunctionType>
     class MDLimiter
     {
     public:
@@ -241,7 +239,7 @@ namespace Foam
         // Member functions
 
         //- Return limiter
-        const GeoFieldType &phiLimiter() const
+        inline const GeoFieldType &phiLimiter() const
         {
             return phiLimiter_;
         }

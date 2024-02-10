@@ -26,27 +26,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicNumericFlux.H"
+#include "makeBasicNumericFlux.H"
+#include "buiFlux.H"
+#include "slauFlux.H"
+#include "slau2Flux.H"
+#include "firstOrderLimiter.H"
+#include "BarthJespersenLimiter.H"
+#include "VenkatakrishnanLimiter.H"
 
-// // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(basicNumericFlux, 0);
-    defineRunTimeSelectionTable(basicNumericFlux, state);
-}
 
-// // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+    /* * * * * * * * * * * * * * * Private Static Data * * * * * * * * * * * * * */
 
-// Foam::basicNumericFlux::basicNumericFlux(const fvMesh &mesh)
-//     : mesh_(mesh)
-// {
-// }
+#define makeBasicNumericFluxForAllLimiters(Flux)       \
+    makeBasicNumericFlux(Flux, firstOrderLimiter);     \
+    makeBasicNumericFlux(Flux, BarthJespersenLimiter); \
+    makeBasicNumericFlux(Flux, VenkatakrishnanLimiter);
 
-// // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+    makeBasicNumericFluxForAllLimiters(buiFlux);
+    makeBasicNumericFluxForAllLimiters(slauFlux);
+    makeBasicNumericFluxForAllLimiters(slau2Flux);
 
-// Foam::basicNumericFlux::~basicNumericFlux()
-// {
-// }
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

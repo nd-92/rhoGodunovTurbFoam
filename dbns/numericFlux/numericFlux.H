@@ -62,8 +62,7 @@ namespace Foam
     \*---------------------------------------------------------------------------*/
 
     template <class Flux, class Limiter>
-    class numericFlux
-        : public numericFluxBase<Flux>
+    class numericFlux : public numericFluxBase<Flux>
     {
         // Private data
 
@@ -119,10 +118,10 @@ namespace Foam
         // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        numericFlux(const numericFlux &);
+        inline numericFlux(const numericFlux &);
 
         //- Disallow default bitwise assignment
-        void operator=(const numericFlux &);
+        inline void operator=(const numericFlux &);
 
         //- Return internal field of mass flux
         inline const scalarField &rhoFluxI() const
@@ -144,7 +143,7 @@ namespace Foam
 
     public:
         //- Runtime type information
-        TypeName("numericFlux");
+        inline TypeName("numericFlux");
 
         // Constructors
 
@@ -194,7 +193,7 @@ namespace Foam
               gradT(fvc::grad(T)){};
 
         //- Destructor
-        virtual ~numericFlux()
+        inline virtual ~numericFlux()
         {
         }
 

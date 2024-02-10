@@ -1,9 +1,7 @@
 #!/bin/sh
-wclean dbns
 wclean buiTurbFoam
 wclean buiTurbFoamHEqn
 wclean rhoGodunovTurbFoam
-wmake dbns
 wmake buiTurbFoam
 wmake buiTurbFoamHEqn
 wmake rhoGodunovTurbFoam

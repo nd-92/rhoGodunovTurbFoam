@@ -54,7 +54,7 @@ namespace Foam
         // Constructors
 
         //- Construct null
-        BarthJespersenLimiter()
+        inline BarthJespersenLimiter()
         {
         }
 
