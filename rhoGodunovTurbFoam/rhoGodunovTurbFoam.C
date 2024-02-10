@@ -50,6 +50,35 @@ Description
 #include "acousticCourantNo.H"
 #include "shockSensor.H"
 
+bool readSolutionApproach(const fvMesh &mesh)
+{
+    word solutionApproach = "new";
+
+    if (mesh.schemesDict().readIfPresent("solutionApproach", solutionApproach))
+    {
+        if (solutionApproach == "old")
+        {
+            Info << "solutionApproach: " << solutionApproach << endl;
+            return true;
+        }
+        else if (solutionApproach == "new")
+        {
+            Info << "solutionApproach: " << solutionApproach << endl;
+            return false;
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "solutionApproach: " << solutionApproach
+                << " is not a valid choice. "
+                << "Options are: old, new"
+                << abort(FatalError);
+            return false;
+        }
+    }
+    return false;
+};
+
 int main(int argc, char *argv[])
 {
 
@@ -64,6 +93,8 @@ int main(int argc, char *argv[])
 #include "createFields.H"
 
 #include "createTimeControls.H"
+
+    const bool useOldApproach = readSolutionApproach(mesh);
 
     Info << "Starting time loop" << endl;
 

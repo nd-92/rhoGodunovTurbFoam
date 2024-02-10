@@ -5,48 +5,94 @@ Co.setDeltaT(maxDeltaT, maxCo, adjustTimeStep);
 runTime++;
 Info << "\nTime = " << runTime.value() << "\n";
 
-// Solve the approximate Riemann problem for this time step
-dbnsFlux.computeFlux();
+if (useOldApproach)
+{
+    // Solve the approximate Riemann problem for this time step
+    dbnsFlux.computeFlux();
 
-// Explicit integration of rho
-solve(fvm::ddt(rho) + fvc::div(dbnsFlux.rhoFlux()));
+    // Time integration
+    solve(                                                                                                                                                                                            //
+        fvm::ddt(rho)                                                                                                                                                                                 //
+        + fvc::div(dbnsFlux.rhoFlux()));                                                                                                                                                              //
+    solve(                                                                                                                                                                                            //
+        fvm::ddt(rhoU)                                                                                                                                                                                //
+        + fvc::div(dbnsFlux.rhoUFlux())                                                                                                                                                               //
+        - fvc::laplacian(turbulence->muEff(), U)                                                                                                                                                      //
+        - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U)))));                                                                                                                               //
+    solve(                                                                                                                                                                                            //
+        fvm::ddt(rhoE)                                                                                                                                                                                //
+        + fvc::div(dbnsFlux.rhoEFlux())                                                                                                                                                               //
+        - fvc::div((fvc::interpolate(turbulence->muEff()) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))) & fvc::interpolate(U)) //
+        - fvc::laplacian(turbulence->alphaEff(), e));                                                                                                                                                 //
 
-// Explicit integration of rhoU
-solve(fvm::ddt(rhoU) + fvc::div(dbnsFlux.rhoUFlux()));
+    // Compute U
+    U = rhoU / rho;
+    U.correctBoundaryConditions();
+    rhoU.boundaryFieldRef() == rho.boundaryField() * U.boundaryField();
 
-// Assign U
-U.ref() = rhoU() / rho();
-U.correctBoundaryConditions();
-rhoU.boundaryFieldRef() == rho.boundaryField() * U.boundaryField();
+    // Calculate internal energy
+    e = ((rhoE / rho) - (0.5 * magSqr(U)));
+    e.correctBoundaryConditions();
 
-// Account for viscous terms in momentum
-solve(fvm::ddt(rho, U) - fvc::ddt(rho, U) - fvm::laplacian(turbulence->muEff(), U) - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U)))));
-rhoU = rho * U;
+    // Correct thermodynamics
+    thermo.correct();
+    rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + 0.5 * magSqr(U.boundaryField()));
 
-// Solve energy equation
-solve(fvm::ddt(rhoE) + fvc::div(dbnsFlux.rhoEFlux()) - fvc::div((fvc::interpolate(turbulence->muEff()) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))) & fvc::interpolate(U)));
+    // Compute p from rho
+    thermo.p().ref() = rho() / thermo.psi();
+    thermo.p().correctBoundaryConditions();
+    rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
 
-// Assign e
-e = (rhoE / rho) - (0.5 * magSqr(U));
-e.correctBoundaryConditions();
-thermo.correct();
-rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + (0.5 * magSqr(U.boundaryField())));
+    // Correct turbulence fields
+    turbulence->correct();
 
-// Account for viscous terms in energy
-solve(fvm::ddt(rho, e) - fvc::ddt(rho, e) - fvm::laplacian(turbulence->alphaEff(), e));
+    // Update the shock sensor
+    shockDetector.update();
+}
+else
+{
+    // Solve the approximate Riemann problem for this time step
+    dbnsFlux.computeFlux();
 
-// Update thermo properties
-thermo.correct();
+    // Explicit integration of rho
+    solve(fvm::ddt(rho) + fvc::div(dbnsFlux.rhoFlux()));
 
-// Finish time step
-rhoE = rho * (e + (0.5 * magSqr(U)));
-thermo.p().ref() = rho() / thermo.psi();
-thermo.p().correctBoundaryConditions();
-rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
+    // Explicit integration of rhoU
+    solve(fvm::ddt(rhoU) + fvc::div(dbnsFlux.rhoUFlux()));
 
-// Update turbulence fields
-turbulence->correct();
+    // Assign U
+    U.ref() = rhoU() / rho();
+    U.correctBoundaryConditions();
+    rhoU.boundaryFieldRef() == rho.boundaryField() * U.boundaryField();
 
-// Update the shock sensor
-shockDetector.update();
-shockDetector.smoothen();
+    // Account for viscous terms in momentum
+    solve(fvm::ddt(rho, U) - fvc::ddt(rho, U) - fvm::laplacian(turbulence->muEff(), U) - fvc::div(turbulence->muEff() * dev2(Foam::T(fvc::grad(U)))));
+    rhoU = rho * U;
+
+    // Solve energy equation
+    solve(fvm::ddt(rhoE) + fvc::div(dbnsFlux.rhoEFlux()) - fvc::div((fvc::interpolate(turbulence->muEff()) * mesh.magSf() * fvc::snGrad(U) + fvc::dotInterpolate(mesh.Sf(), turbulence->muEff() * dev2(Foam::T(fvc::grad(U))))) & fvc::interpolate(U)));
+
+    // Assign e
+    e = (rhoE / rho) - (0.5 * magSqr(U));
+    e.correctBoundaryConditions();
+    thermo.correct();
+    rhoE.boundaryFieldRef() == rho.boundaryField() * (e.boundaryField() + (0.5 * magSqr(U.boundaryField())));
+
+    // Account for viscous terms in energy
+    solve(fvm::ddt(rho, e) - fvc::ddt(rho, e) - fvm::laplacian(turbulence->alphaEff(), e));
+
+    // Update thermo properties
+    thermo.correct();
+
+    // Finish time step
+    rhoE = rho * (e + (0.5 * magSqr(U)));
+    thermo.p().ref() = rho() / thermo.psi();
+    thermo.p().correctBoundaryConditions();
+    rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
+
+    // Update turbulence fields
+    turbulence->correct();
+
+    // Update the shock sensor
+    shockDetector.update();
+}

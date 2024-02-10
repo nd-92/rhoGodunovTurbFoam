@@ -250,9 +250,9 @@ namespace Foam
             // const scalar flux5 = (0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35)));
 
             // Compute private data
-            rhoFlux = (0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31))) * magSf;
-            rhoUFlux = (0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324))) * magSf;
-            rhoEFlux = (0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35))) * magSf;
+            rhoFlux = (0.5 * ((fluxLeft11 + fluxRight11) - (buiEps * (diffF11 + diffF21 + diffF31)))) * magSf;
+            rhoUFlux = (0.5 * ((fluxLeft124 + fluxRight124) - (buiEps * (diffF124 + diffF224 + diffF324)))) * magSf;
+            rhoEFlux = (0.5 * ((fluxLeft15 + fluxRight15) - (buiEps * (diffF15 + diffF25 + diffF35)))) * magSf;
         }
     };
 

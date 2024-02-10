@@ -39,21 +39,6 @@ volScalarField rhoE(
         IOobject::NO_WRITE),
     thermo.rho() * (e + 0.5 * magSqr(U)));
 
-// // Upwinding factor
-// Info << "Reading field upwindingFactor" << endl;
-// const volScalarField upwindingFactor(
-//     IOobject(
-//         "upwindingFactor",
-//         runTime.timeName(),
-//         mesh,
-//         IOobject::READ_IF_PRESENT,
-//         IOobject::AUTO_WRITE),
-//     mesh,
-//     dimensionedScalar(
-//         "one",
-//         dimless,
-//         1));
-
 // Density gradient-based shock sensor
 shockSensor<psiThermo> shockDetector(U, mesh, thermo, runTime);
 
@@ -77,23 +62,23 @@ autoPtr<compressible::turbulenceModel> turbulence(
         thermo));
 
 // LES delta
-volScalarField LESdelta(
-    IOobject(
-        "LESdelta",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE),
-    mesh,
-    dimensionedScalar("LESdelta", dimLength, 0));
+// volScalarField LESdelta(
+//     IOobject(
+//         "LESdelta",
+//         runTime.timeName(),
+//         mesh,
+//         IOobject::NO_READ,
+//         IOobject::AUTO_WRITE),
+//     mesh,
+//     dimensionedScalar("LESdelta", dimLength, 0));
 
-if (mesh.objectRegistry::foundObject<volScalarField>("delta") == true)
-{
-    const volScalarField &delta = mesh.objectRegistry::lookupObject<volScalarField>("delta");
+// if (mesh.objectRegistry::foundObject<volScalarField>("delta") == true)
+// {
+//     const volScalarField &delta = mesh.objectRegistry::lookupObject<volScalarField>("delta");
 
-    LESdelta.internalFieldRef() = delta.internalField();
-    LESdelta.boundaryFieldRef() = delta.boundaryField();
-}
+//     LESdelta.internalFieldRef() = delta.internalField();
+//     LESdelta.boundaryFieldRef() = delta.boundaryField();
+// }
 
 // Runge-Kutta coefficient
 // rungeKutta rkCoeffs;

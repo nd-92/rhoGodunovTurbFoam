@@ -66,10 +66,14 @@ namespace Foam
     protected:
         // Protected member functions
 
-        //- Construct as copy (not implemented)
-        basicNumericFlux(const basicNumericFlux &);
-
     public:
+        // Constructor
+        inline basicNumericFlux(const fvMesh &mesh)
+            : mesh_(mesh){};
+
+        // Destructor
+        virtual inline ~basicNumericFlux(){};
+
         //- Runtime type information
         TypeName("basicNumericFlux");
 
@@ -89,12 +93,6 @@ namespace Foam
             (p, U, T, upwindingFactor, thermo));
 #endif
 
-        // Constructors
-
-        //- Construct from components
-        basicNumericFlux(
-            const fvMesh &mesh);
-
         //- Selector
         static autoPtr<basicNumericFlux> New(
             const volScalarField &p,
@@ -102,9 +100,6 @@ namespace Foam
             const volScalarField &T,
             const volScalarField &upwindingFactor,
             const basicThermo &thermo);
-
-        //- Destructor
-        virtual ~basicNumericFlux();
 
         // Member functions
 

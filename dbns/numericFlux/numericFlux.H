@@ -50,6 +50,7 @@ SourceFiles
 #include "cyclicFvPatch.H"
 #include "wallFvPatch.H"
 #include "shockSensor.H"
+#include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -88,6 +89,10 @@ namespace Foam
 
         //- Reference to the thermophysicalModel
         const basicThermo &thermo_;
+
+        //-Thermodynamic properties
+        const volScalarField Cv_;
+        volScalarField R_;
 
         // Fluxes
 
@@ -158,6 +163,8 @@ namespace Foam
               buiEps_(fvc::interpolate(upwindingFactor)),
               upwindingFactorMin_(this->mesh().schemesDict().subDict("divSchemes").subDict("dbns").lookupOrDefault("epsilonMin", 1.0)),
               thermo_(thermo),
+              Cv_(thermo.Cv()),
+              R_(thermo.Cp() - thermo.Cv()),
               rhoFlux_(
                   IOobject(
                       "phi",
@@ -219,7 +226,7 @@ namespace Foam
         inline void computeFlux()
         {
             // Update the upwinding factor
-            buiEps_ = fvc::interpolate((upwindingFactor_ * (1 - upwindingFactorMin_)) + upwindingFactorMin_);
+            buiEps_ = (linearInterpolate(upwindingFactor_) * (1 - upwindingFactorMin_)) + upwindingFactorMin_;
 
             // Get face-to-cell addressing: face area point from owner to neighbour
             const labelUList &owner = this->mesh().owner();
@@ -231,10 +238,6 @@ namespace Foam
 
             const volVectorField &cellCentre = this->mesh().C();
             const surfaceVectorField &faceCentre = this->mesh().Cf();
-
-            // Thermodynamics
-            const volScalarField Cv = thermo_.Cv();
-            const volScalarField R = thermo_.Cp() - Cv;
 
             // Get gradients
             // Coupled patch update on gradients moved into gradScheme.C
@@ -287,10 +290,10 @@ namespace Foam
                     U_[nei] + cmptMultiply(ULimiter[nei], (deltaRRight & gradU[nei])),
                     T_[own] + TLimiter[own] * (deltaRLeft & gradT[own]),
                     T_[nei] + TLimiter[nei] * (deltaRRight & gradT[nei]),
-                    R[own],
-                    R[nei],
-                    Cv[own],
-                    Cv[nei],
+                    R_[own],
+                    R_[nei],
+                    Cv_[own],
+                    Cv_[nei],
                     Sf[faceI],
                     magSf[faceI],
                     buiEps_[faceI]);
@@ -311,8 +314,8 @@ namespace Foam
                 const vectorField &pU = U_.boundaryField()[patchi];
                 const scalarField &pT = T_.boundaryField()[patchi];
 
-                const scalarField &pCv = Cv.boundaryField()[patchi];
-                const scalarField &pR = R.boundaryField()[patchi];
+                const scalarField &pCv = Cv_.boundaryField()[patchi];
+                const scalarField &pR = R_.boundaryField()[patchi];
 
                 // Gradients
                 const fvPatchVectorField &pGradP = gradP.boundaryField()[patchi];

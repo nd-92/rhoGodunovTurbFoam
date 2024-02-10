@@ -28,7 +28,7 @@ License
 
 #include "basicNumericFlux.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -36,17 +36,17 @@ namespace Foam
     defineRunTimeSelectionTable(basicNumericFlux, state);
 }
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicNumericFlux::basicNumericFlux(const fvMesh &mesh)
-    : mesh_(mesh)
-{
-}
+// Foam::basicNumericFlux::basicNumericFlux(const fvMesh &mesh)
+//     : mesh_(mesh)
+// {
+// }
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::basicNumericFlux::~basicNumericFlux()
-{
-}
+// Foam::basicNumericFlux::~basicNumericFlux()
+// {
+// }
 
 // ************************************************************************* //

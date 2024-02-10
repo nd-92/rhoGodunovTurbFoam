@@ -46,6 +46,7 @@ namespace Foam
 {
     // Helper function to construct local shock sensor DT
     inline const volScalarField localFilterDT(
+        // inline const dimensionedScalar localFilterDT(
         const fvMesh &mesh,
         const Time &runTime)
     {
@@ -75,7 +76,7 @@ namespace Foam
             filterWidthBf[patchi] = sqrt(mesh.magSf().boundaryField()[patchi]) * filterScale;
         }
 
-        return sqr(filterWidth) / dimensionedScalar("dt_", dimensionSet(0, 0, 1, 0, 0), mesh.time().deltaTValue());
+        return sqr(filterWidth) / dimensionedScalar("dt_", dimTime, mesh.time().deltaTValue());
     };
 
     // Helper function to construct smoothing switch
@@ -112,25 +113,15 @@ namespace Foam
               mesh_(mesh),
               thermo_(thermo),
               runTime_(runTime),
+              DT_(localFilterDT(mesh_, runTime_)),
               shockSensor_(
                   IOobject(
-                      "epsilon",
+                      "buiEps",
                       runTime.timeName(),
                       mesh,
-                      IOobject::NO_READ,
+                      IOobject::MUST_READ,
                       IOobject::AUTO_WRITE),
-                  mag(fvc::grad(thermo_.rho())) / max(mag(fvc::grad(thermo_.rho())))),
-              DT_(localFilterDT(mesh_, runTime_)),
-              sensorSmoother_(
-                  IOobject(
-                      "epsilonSmoother",
-                      runTime.timeName(),
-                      mesh,
-                      IOobject::NO_READ,
-                      IOobject::NO_WRITE),
-                  mag(fvc::grad(thermo_.rho())) / max(mag(fvc::grad(thermo_.rho()))),
-                  fixedValueFvPatchScalarField::typeName),
-              applySmoothing_(isSmoothing(mesh)){};
+                  mesh){};
 
         // Destructor
         inline ~shockSensor(){};
@@ -138,32 +129,16 @@ namespace Foam
         // Update the shock sensor
         inline void update()
         {
+            // Shock sensor is proportional to mag(grad(rho))
             shockSensor_ = mag(fvc::grad(thermo_.rho())) / max(mag(fvc::grad(thermo_.rho())));
+
+            // Smoothen the shock sensor by solving the Laplace equation in pseudo-time
+            solve(fvm::ddt(shockSensor_) - fvm::laplacian(DT_, shockSensor_));
+            shockSensor_.correctBoundaryConditions();
+
+            // Clamp to a range of 0 to 1
+            shockSensor_ = (shockSensor_ - min(shockSensor_)) / (max(shockSensor_) - min(shockSensor_));
         }
-
-        // Smoothen the shock sensor by solving the Laplace equation in pseudo-time
-        inline void smoothen()
-        {
-            if (applySmoothing_)
-            {
-                // Create scalar smooth field from virgin scalar smooth field template
-                volScalarField &sensorSmoother = sensorSmoother_;
-                sensorSmoother == shockSensor_;
-                sensorSmoother.correctBoundaryConditions();
-                sensorSmoother.oldTime() = shockSensor_;
-                sensorSmoother.oldTime().correctBoundaryConditions();
-
-                // Laplacian smoothing
-                solve(fvm::ddt(sensorSmoother) - fvm::laplacian(DT_, sensorSmoother));
-
-                // Assign smoothened values
-                shockSensor_ = sensorSmoother;
-                shockSensor_.correctBoundaryConditions();
-
-                // Clamp to a range of 0 to 1
-                shockSensor_ = (shockSensor_ - min(shockSensor_)) / (max(shockSensor_) - min(shockSensor_));
-            }
-        };
 
         // Public const access to the shock sensor
         inline const volScalarField &upwindingFactor() const
@@ -184,18 +159,11 @@ namespace Foam
         // Const access to runTime
         const Time &runTime_;
 
-        // Scalar shock sensor
-        volScalarField shockSensor_;
-
-        // Laplacian smoothing length and time
-        // const volScalarField smoothingLength_;
+        // ddt(Laplacian) operator scale
         const volScalarField DT_;
 
         // Virgin smoother field
-        volScalarField sensorSmoother_;
-
-        // Determine whether or not to apply Laplacian smoothing
-        const bool applySmoothing_;
+        volScalarField shockSensor_;
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
