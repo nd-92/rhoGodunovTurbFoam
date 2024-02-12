@@ -67,7 +67,7 @@ const volScalarField acousticDamping(
         "acousticDamping",
         runTime.timeName(),
         mesh,
-        IOobject::MUST_READ,
+        IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE),
     mesh,
     dimensionedScalar("one", dimless, 1));
