@@ -61,6 +61,17 @@ autoPtr<compressible::turbulenceModel> turbulence(
         phi,
         thermo));
 
+// Acoustic damping
+const volScalarField acousticDamping(
+    IOobject(
+        "acousticDamping",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::AUTO_WRITE),
+    mesh,
+    dimensionedScalar("one", dimless, 1));
+
 // LES delta
 // volScalarField LESdelta(
 //     IOobject(
