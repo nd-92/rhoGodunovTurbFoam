@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
 #include "createTimeControls.H"
 
-    const bool useOldApproach = readSolutionApproach(mesh);
+    // const bool useOldApproach = readSolutionApproach(mesh);
 
     // Get reference values for damping
     const dimensionedScalar T_inf(

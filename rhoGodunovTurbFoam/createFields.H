@@ -92,7 +92,7 @@ const volScalarField noDamping = 1 - acousticDamping;
 // }
 
 // Runge-Kutta coefficient
-// rungeKutta rkCoeffs;
+rungeKutta rkCoeffs;
 
 // Acoustic Courant number CFL control
 acousticCourantNo<psiThermo> Co(U, mesh, thermo, runTime);
