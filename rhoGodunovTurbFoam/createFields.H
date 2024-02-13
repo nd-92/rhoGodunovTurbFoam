@@ -70,6 +70,7 @@ const volScalarField acousticDamping(
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE),
     mesh);
+const volScalarField noDamping = 1 - acousticDamping;
 
 // LES delta
 // volScalarField LESdelta(

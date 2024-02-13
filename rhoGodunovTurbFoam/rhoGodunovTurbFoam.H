@@ -86,13 +86,13 @@ else
 }
 
 // Apply damping
-thermo.T() = (T_inf * acousticDamping) + (thermo.T() * (1 - acousticDamping));
+thermo.T() = (T_inf * acousticDamping) + (thermo.T() * noDamping);
 thermo.T().correctBoundaryConditions();
-thermo.p() = (p_inf * acousticDamping) + (thermo.p() * (1 - acousticDamping));
+thermo.p() = (p_inf * acousticDamping) + (thermo.p() * noDamping);
 thermo.p().correctBoundaryConditions();
-rho = (rho_inf * acousticDamping) + (rho * (1 - acousticDamping));
+rho = (rho_inf * acousticDamping) + (rho * noDamping);
 rho.correctBoundaryConditions();
-U = (U_inf * acousticDamping) + (U * (1 - acousticDamping));
+U = (U_inf * acousticDamping) + (U * noDamping);
 U.correctBoundaryConditions();
 
 // Update turbulence fields
