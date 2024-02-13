@@ -42,22 +42,6 @@ if (useOldApproach)
     thermo.p().ref() = rho() / thermo.psi();
     thermo.p().correctBoundaryConditions();
     rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
-
-    // Apply damping
-    thermo.T() = (thermo.T() * acousticDamping) - (T_inf * (acousticDamping - 1));
-    thermo.T().correctBoundaryConditions();
-    thermo.p() = (thermo.p() * acousticDamping) - (p_inf * (acousticDamping - 1));
-    thermo.p().correctBoundaryConditions();
-    rho = (rho * acousticDamping) - (rho_inf * (acousticDamping - 1));
-    rho.correctBoundaryConditions();
-    U = (U * acousticDamping) - (U_inf * (acousticDamping - 1));
-    U.correctBoundaryConditions();
-
-    // Correct turbulence fields
-    turbulence->correct();
-
-    // Update the shock sensor
-    shockDetector.update();
 }
 else
 {
@@ -99,20 +83,20 @@ else
     thermo.p().ref() = rho() / thermo.psi();
     thermo.p().correctBoundaryConditions();
     rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
-
-    // Apply damping
-    thermo.T() = (thermo.T() * acousticDamping) - (T_inf * (acousticDamping - 1));
-    thermo.T().correctBoundaryConditions();
-    thermo.p() = (thermo.p() * acousticDamping) - (p_inf * (acousticDamping - 1));
-    thermo.p().correctBoundaryConditions();
-    rho = (rho * acousticDamping) - (rho_inf * (acousticDamping - 1));
-    rho.correctBoundaryConditions();
-    U = (U * acousticDamping) - (U_inf * (acousticDamping - 1));
-    U.correctBoundaryConditions();
-
-    // Update turbulence fields
-    turbulence->correct();
-
-    // Update the shock sensor
-    shockDetector.update();
 }
+
+// Apply damping
+thermo.T() = (T_inf * acousticDamping) + (thermo.T() * (1 - acousticDamping));
+thermo.T().correctBoundaryConditions();
+thermo.p() = (p_inf * acousticDamping) + (thermo.p() * (1 - acousticDamping));
+thermo.p().correctBoundaryConditions();
+rho = (rho_inf * acousticDamping) + (rho * (1 - acousticDamping));
+rho.correctBoundaryConditions();
+U = (U_inf * acousticDamping) + (U * (1 - acousticDamping));
+U.correctBoundaryConditions();
+
+// Update turbulence fields
+turbulence->correct();
+
+// Update the shock sensor
+shockDetector.update();
