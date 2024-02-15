@@ -44,57 +44,6 @@ SourceFiles
 
 namespace Foam
 {
-    // Helper function to construct local shock sensor DT
-    inline const volScalarField localFilterDT(
-        // inline const dimensionedScalar localFilterDT(
-        const fvMesh &mesh,
-        const Time &runTime)
-    {
-        const scalar filterScale = mesh.schemesDict().subDict("divSchemes").subDict("dbns").lookupOrDefault("shockFilter", 1.0);
-
-        volScalarField filterWidth(
-            IOobject(
-                "shockSensorFilterWidth",
-                runTime.timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE),
-            mesh,
-            dimensionedScalar("zero", dimLength, 0));
-
-        // Loop over all cells, setting volume
-        forAll(mesh.cells(), i)
-        {
-            filterWidth[i] = pow(mesh.V()[i], 1.0 / 3.0) * filterScale;
-        }
-
-        // Loop over all boundary faces, setting area
-        volScalarField::Boundary &filterWidthBf = filterWidth.boundaryFieldRef();
-        forAll(filterWidthBf, patchi)
-        {
-            // Test setting area
-            filterWidthBf[patchi] = sqrt(mesh.magSf().boundaryField()[patchi]) * filterScale;
-        }
-
-        return sqr(filterWidth) / dimensionedScalar("dt_", dimTime, mesh.time().deltaTValue());
-    };
-
-    // Helper function to construct smoothing switch
-    inline bool isSmoothing(
-        const fvMesh &mesh)
-    {
-        const scalar filterScale = mesh.schemesDict().subDict("divSchemes").subDict("dbns").lookupOrDefault("shockFilter", 1.0);
-        if (filterScale > 0)
-        {
-            Info << "Initialised shock sensor with local filter with scale = " << filterScale << " : 1" << endl;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    };
-
     /*---------------------------------------------------------------------------*\
                                Class shockSensor Declaration
     \*---------------------------------------------------------------------------*/
@@ -113,15 +62,23 @@ namespace Foam
               mesh_(mesh),
               thermo_(thermo),
               runTime_(runTime),
-              DT_(localFilterDT(mesh_, runTime_)),
+              rhoGradRef_(dimensionedScalar(
+                  "refVal",
+                  dimMass / (dimLength * dimLength * dimLength * dimLength),
+                  readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("rhoGrad")))),
               shockSensor_(
                   IOobject(
                       "buiEps",
                       runTime.timeName(),
                       mesh,
-                      IOobject::MUST_READ,
+                      IOobject::NO_READ,
                       IOobject::AUTO_WRITE),
-                  mesh){};
+                  mag(fvc::grad(thermo_.rho())) / rhoGradRef_),
+              USmall_(dimensionedScalar("USmall", dimLength / dimTime, SMALL))
+        {
+            shockSensor_ = erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_);
+            shockSensor_ = shockSensor_ / max(shockSensor_);
+        };
 
         // Destructor
         inline ~shockSensor(){};
@@ -130,14 +87,22 @@ namespace Foam
         inline void update()
         {
             // Shock sensor is proportional to mag(grad(rho))
-            shockSensor_ = mag(fvc::grad(thermo_.rho())) / max(mag(fvc::grad(thermo_.rho())));
+            // shockSensor_ = mag(fvc::grad(thermo_.rho())) / rhoGradRef_;
 
-            // Smoothen the shock sensor by solving the Laplace equation in pseudo-time
-            solve(fvm::ddt(shockSensor_) - fvm::laplacian(DT_, shockSensor_));
-            shockSensor_.correctBoundaryConditions();
+            // Shock sensor is proportional to mag(grad(rho) & psi)
+            // This is more directional
+            // shockSensor_ = mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_;
 
-            // Clamp to a range of 0 to 1
-            shockSensor_ = (shockSensor_ - min(shockSensor_)) / (max(shockSensor_) - min(shockSensor_));
+            // // Clip the shock sensor function between 0 and 1
+            // shockSensor_ = erf(shockSensor_);
+            // shockSensor_ = shockSensor_ / max(shockSensor_);
+
+            // Shock sensor is proportional to mag(grad(rho) & psi)
+            // Clip the shock sensor function between 0 and 1
+            shockSensor_ = erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_);
+            shockSensor_ = shockSensor_ / max(shockSensor_);
+            // Info << min(shockSensor_) << endl;
+            // Info << max(shockSensor_) << endl;
         }
 
         // Public const access to the shock sensor
@@ -159,11 +124,14 @@ namespace Foam
         // Const access to runTime
         const Time &runTime_;
 
-        // ddt(Laplacian) operator scale
-        const volScalarField DT_;
+        // Density gradient clip value
+        const dimensionedScalar rhoGradRef_;
 
-        // Virgin smoother field
+        // Shock sensor
         volScalarField shockSensor_;
+
+        // Small amount of velocity to help with direction vector
+        const dimensionedScalar USmall_;
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
