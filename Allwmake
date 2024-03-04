@@ -1,7 +1,4 @@
 #!/bin/sh
-wclean buiTurbFoam
-wclean buiTurbFoamHEqn
+clear
 wclean rhoGodunovTurbFoam
-wmake buiTurbFoam
-wmake buiTurbFoamHEqn
 wmake rhoGodunovTurbFoam

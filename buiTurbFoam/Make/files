@@ -1,3 +1,0 @@
-buiTurbFoam.C
-
-EXE = $(FOAM_USER_APPBIN)/buiTurbFoam

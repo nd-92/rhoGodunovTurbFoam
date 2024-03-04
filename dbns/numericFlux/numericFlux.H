@@ -171,7 +171,7 @@ namespace Foam
                       this->mesh(),
                       IOobject::NO_READ,
                       IOobject::NO_WRITE),
-                  (linearInterpolate(thermo.rho() * U) & this->mesh().Sf())),
+                  (fvc::interpolate(thermo.rho() * U) & this->mesh().Sf())),
               rhoUFlux_(
                   IOobject(
                       "rhoUFlux",
@@ -179,7 +179,7 @@ namespace Foam
                       this->mesh(),
                       IOobject::NO_READ,
                       IOobject::NO_WRITE),
-                  rhoFlux_ * linearInterpolate(U)),
+                  rhoFlux_ * fvc::interpolate(U)),
               rhoEFlux_(
                   IOobject(
                       "rhoEFlux",
@@ -187,7 +187,7 @@ namespace Foam
                       this->mesh(),
                       IOobject::NO_READ,
                       IOobject::NO_WRITE),
-                  rhoFlux_ * linearInterpolate(thermo.Cv() * T + 0.5 * magSqr(U))),
+                  rhoFlux_ * fvc::interpolate(thermo.Cv() * T + 0.5 * magSqr(U))),
               gradP(fvc::grad(p)),
               gradU(fvc::grad(U)),
               gradT(fvc::grad(T)){};
@@ -252,22 +252,22 @@ namespace Foam
             const tmp<volVectorField> tgradT = fvc::grad(T_);
             const volVectorField &gradT = tgradT();
 
-            // const MDLimiter<scalar, Limiter> scalarPLimiter(
-            //     this->p_,
-            //     gradP);
+            const MDLimiter<scalar, Limiter> scalarPLimiter(
+                this->p_,
+                gradP);
 
-            // const MDLimiter<vector, Limiter> vectorULimiter(
-            //     this->U_,
-            //     gradU);
+            const MDLimiter<vector, Limiter> vectorULimiter(
+                this->U_,
+                gradU);
 
-            // const MDLimiter<scalar, Limiter> scalarTLimiter(
-            //     this->T_,
-            //     gradT);
+            const MDLimiter<scalar, Limiter> scalarTLimiter(
+                this->T_,
+                gradT);
 
-            // // Get limiters
-            // const volScalarField &pLimiter = scalarPLimiter.phiLimiter();
-            // const volVectorField &ULimiter = vectorULimiter.phiLimiter();
-            // const volScalarField &TLimiter = scalarTLimiter.phiLimiter();
+            // Get limiters
+            const volScalarField &pLimiter = scalarPLimiter.phiLimiter();
+            const volVectorField &ULimiter = vectorULimiter.phiLimiter();
+            const volScalarField &TLimiter = scalarTLimiter.phiLimiter();
 
             // Calculate fluxes at internal faces
             forAll(owner, faceI)
@@ -279,33 +279,16 @@ namespace Foam
                 const vector deltaRRight = faceCentre[faceI] - cellCentre[nei];
 
                 // calculate fluxes with reconstructed primitive variables at faces
-                // Flux::evaluateFlux(
-                //     rhoFlux_[faceI],
-                //     rhoUFlux_[faceI],
-                //     rhoEFlux_[faceI],
-                //     p_[own] + pLimiter[own] * (deltaRLeft & gradP[own]),
-                //     p_[nei] + pLimiter[nei] * (deltaRRight & gradP[nei]),
-                //     U_[own] + cmptMultiply(ULimiter[own], (deltaRLeft & gradU[own])),
-                //     U_[nei] + cmptMultiply(ULimiter[nei], (deltaRRight & gradU[nei])),
-                //     T_[own] + TLimiter[own] * (deltaRLeft & gradT[own]),
-                //     T_[nei] + TLimiter[nei] * (deltaRRight & gradT[nei]),
-                //     R_[own],
-                //     R_[nei],
-                //     Cv_[own],
-                //     Cv_[nei],
-                //     Sf[faceI],
-                //     magSf[faceI],
-                //     buiEps_[faceI]);
                 Flux::evaluateFlux(
                     rhoFlux_[faceI],
                     rhoUFlux_[faceI],
                     rhoEFlux_[faceI],
-                    p_[own] + (deltaRLeft & gradP[own]),
-                    p_[nei] + (deltaRRight & gradP[nei]),
-                    U_[own] + (deltaRLeft & gradU[own]),
-                    U_[nei] + (deltaRRight & gradU[nei]),
-                    T_[own] + (deltaRLeft & gradT[own]),
-                    T_[nei] + (deltaRRight & gradT[nei]),
+                    p_[own] + pLimiter[own] * (deltaRLeft & gradP[own]),
+                    p_[nei] + pLimiter[nei] * (deltaRRight & gradP[nei]),
+                    U_[own] + cmptMultiply(ULimiter[own], (deltaRLeft & gradU[own])),
+                    U_[nei] + cmptMultiply(ULimiter[nei], (deltaRRight & gradU[nei])),
+                    T_[own] + TLimiter[own] * (deltaRLeft & gradT[own]),
+                    T_[nei] + TLimiter[nei] * (deltaRRight & gradT[nei]),
                     R_[own],
                     R_[nei],
                     Cv_[own],
@@ -313,6 +296,24 @@ namespace Foam
                     Sf[faceI],
                     magSf[faceI],
                     buiEps_[faceI]);
+                // Flux::evaluateFlux(
+                //     rhoFlux_[faceI],
+                //     rhoUFlux_[faceI],
+                //     rhoEFlux_[faceI],
+                //     p_[own] + (deltaRLeft & gradP[own]),
+                //     p_[nei] + (deltaRRight & gradP[nei]),
+                //     U_[own] + (deltaRLeft & gradU[own]),
+                //     U_[nei] + (deltaRRight & gradU[nei]),
+                //     T_[own] + (deltaRLeft & gradT[own]),
+                //     T_[nei] + (deltaRRight & gradT[nei]),
+                //     R_[own],
+                //     R_[nei],
+                //     Cv_[own],
+                //     Cv_[nei],
+                //     Sf[faceI],
+                //     magSf[faceI],
+                //     // buiEps_[faceI]);
+                //     1.0);
             }
 
             // Update boundary field and values
@@ -339,9 +340,9 @@ namespace Foam
                 const fvPatchVectorField &pGradT = gradT.boundaryField()[patchi];
 
                 // Limiters
-                // const fvPatchScalarField &pPatchLim = pLimiter.boundaryField()[patchi];
-                // const fvPatchVectorField &UPatchLim = ULimiter.boundaryField()[patchi];
-                // const fvPatchScalarField &TPatchLim = TLimiter.boundaryField()[patchi];
+                const fvPatchScalarField &pPatchLim = pLimiter.boundaryField()[patchi];
+                const fvPatchVectorField &UPatchLim = ULimiter.boundaryField()[patchi];
+                const fvPatchScalarField &TPatchLim = TLimiter.boundaryField()[patchi];
 
                 // Face areas
                 const fvsPatchVectorField &pSf = Sf.boundaryField()[patchi];
@@ -378,44 +379,27 @@ namespace Foam
 
                     // Limiters
 
-                    // const scalarField ppLimiterLeft = pPatchLim.patchInternalField();
-                    // const scalarField ppLimiterRight = pPatchLim.patchNeighbourField();
+                    const scalarField ppLimiterLeft = pPatchLim.patchInternalField();
+                    const scalarField ppLimiterRight = pPatchLim.patchNeighbourField();
 
-                    // const vectorField pULimiterLeft = UPatchLim.patchInternalField();
-                    // const vectorField pULimiterRight = UPatchLim.patchNeighbourField();
+                    const vectorField pULimiterLeft = UPatchLim.patchInternalField();
+                    const vectorField pULimiterRight = UPatchLim.patchNeighbourField();
 
-                    // const scalarField pTLimiterLeft = TPatchLim.patchInternalField();
-                    // const scalarField pTLimiterRight = TPatchLim.patchNeighbourField();
+                    const scalarField pTLimiterLeft = TPatchLim.patchInternalField();
+                    const scalarField pTLimiterRight = TPatchLim.patchNeighbourField();
 
                     forAll(pp, facei)
                     {
-                        // Flux::evaluateFlux(
-                        //     pRhoFlux[facei],
-                        //     pRhoUFlux[facei],
-                        //     pRhoEFlux[facei],
-                        //     ppLeft[facei] + ppLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradPLeft[facei]),
-                        //     ppRight[facei] + ppLimiterRight[facei] * (pDdeltaRRight[facei] & pgradPRight[facei]),
-                        //     pULeft[facei] + cmptMultiply(pULimiterLeft[facei], pDeltaRLeft[facei] & pgradULeft[facei]),
-                        //     pURight[facei] + cmptMultiply(pULimiterRight[facei], pDdeltaRRight[facei] & pgradURight[facei]),
-                        //     pTLeft[facei] + pTLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradTLeft[facei]),
-                        //     pTRight[facei] + pTLimiterRight[facei] * (pDdeltaRRight[facei] & pgradTRight[facei]),
-                        //     pR[facei],
-                        //     pR[facei],
-                        //     pCv[facei],
-                        //     pCv[facei],
-                        //     pSf[facei],
-                        //     pMagSf[facei],
-                        //     buiEps_[facei]);
                         Flux::evaluateFlux(
                             pRhoFlux[facei],
                             pRhoUFlux[facei],
                             pRhoEFlux[facei],
-                            ppLeft[facei] + (pDeltaRLeft[facei] & pgradPLeft[facei]),
-                            ppRight[facei] + (pDdeltaRRight[facei] & pgradPRight[facei]),
-                            pULeft[facei] + (pDeltaRLeft[facei] & pgradULeft[facei]),
-                            pURight[facei] + (pDdeltaRRight[facei] & pgradURight[facei]),
-                            pTLeft[facei] + (pDeltaRLeft[facei] & pgradTLeft[facei]),
-                            pTRight[facei] + (pDdeltaRRight[facei] & pgradTRight[facei]),
+                            ppLeft[facei] + ppLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradPLeft[facei]),
+                            ppRight[facei] + ppLimiterRight[facei] * (pDdeltaRRight[facei] & pgradPRight[facei]),
+                            pULeft[facei] + cmptMultiply(pULimiterLeft[facei], pDeltaRLeft[facei] & pgradULeft[facei]),
+                            pURight[facei] + cmptMultiply(pULimiterRight[facei], pDdeltaRRight[facei] & pgradURight[facei]),
+                            pTLeft[facei] + pTLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradTLeft[facei]),
+                            pTRight[facei] + pTLimiterRight[facei] * (pDdeltaRRight[facei] & pgradTRight[facei]),
                             pR[facei],
                             pR[facei],
                             pCv[facei],
@@ -423,6 +407,24 @@ namespace Foam
                             pSf[facei],
                             pMagSf[facei],
                             buiEps_[facei]);
+                        // Flux::evaluateFlux(
+                        //     pRhoFlux[facei],
+                        //     pRhoUFlux[facei],
+                        //     pRhoEFlux[facei],
+                        //     ppLeft[facei] + (pDeltaRLeft[facei] & pgradPLeft[facei]),
+                        //     ppRight[facei] + (pDdeltaRRight[facei] & pgradPRight[facei]),
+                        //     pULeft[facei] + pDeltaRLeft[facei] & pgradULeft[facei],
+                        //     pURight[facei] + pDdeltaRRight[facei] & pgradURight[facei],
+                        //     pTLeft[facei] + (pDeltaRLeft[facei] & pgradTLeft[facei]),
+                        //     pTRight[facei] + (pDdeltaRRight[facei] & pgradTRight[facei]),
+                        //     pR[facei],
+                        //     pR[facei],
+                        //     pCv[facei],
+                        //     pCv[facei],
+                        //     pSf[facei],
+                        //     pMagSf[facei],
+                        //     // buiEps_[facei]);
+                        //     1.0);
                     }
                 }
                 else
@@ -447,6 +449,7 @@ namespace Foam
                             pSf[facei],
                             pMagSf[facei],
                             buiEps_[facei]);
+                        // 1.0);
                     }
                 }
             }

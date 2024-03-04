@@ -66,6 +66,14 @@ namespace Foam
                   "refVal",
                   dimMass / (dimLength * dimLength * dimLength * dimLength),
                   readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("rhoGrad")))),
+              directionalShockSensor_(
+                  IOobject(
+                      "shockSensor",
+                      runTime.timeName(),
+                      mesh,
+                      IOobject::NO_READ,
+                      IOobject::AUTO_WRITE),
+                  mag(fvc::grad(thermo_.rho())) / rhoGradRef_),
               shockSensor_(
                   IOobject(
                       "buiEps",
@@ -76,6 +84,8 @@ namespace Foam
                   mag(fvc::grad(thermo_.rho())) / rhoGradRef_),
               USmall_(dimensionedScalar("USmall", dimLength / dimTime, SMALL))
         {
+            directionalShockSensor_ = erf(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_)) / rhoGradRef_);
+            directionalShockSensor_ = directionalShockSensor_ / max(directionalShockSensor_);
             shockSensor_ = erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_);
             shockSensor_ = shockSensor_ / max(shockSensor_);
         };
@@ -86,23 +96,10 @@ namespace Foam
         // Update the shock sensor
         inline void update()
         {
-            // Shock sensor is proportional to mag(grad(rho))
-            // shockSensor_ = mag(fvc::grad(thermo_.rho())) / rhoGradRef_;
-
-            // Shock sensor is proportional to mag(grad(rho) & psi)
-            // This is more directional
-            // shockSensor_ = mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_;
-
-            // // Clip the shock sensor function between 0 and 1
-            // shockSensor_ = erf(shockSensor_);
-            // shockSensor_ = shockSensor_ / max(shockSensor_);
-
-            // Shock sensor is proportional to mag(grad(rho) & psi)
-            // Clip the shock sensor function between 0 and 1
+            directionalShockSensor_ = erf(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_)) / rhoGradRef_);
+            directionalShockSensor_ = directionalShockSensor_ / max(directionalShockSensor_);
             shockSensor_ = erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_);
             shockSensor_ = shockSensor_ / max(shockSensor_);
-            // Info << min(shockSensor_) << endl;
-            // Info << max(shockSensor_) << endl;
         }
 
         // Public const access to the shock sensor
@@ -126,6 +123,9 @@ namespace Foam
 
         // Density gradient clip value
         const dimensionedScalar rhoGradRef_;
+
+        // Directional sensor
+        volScalarField directionalShockSensor_;
 
         // Shock sensor
         volScalarField shockSensor_;

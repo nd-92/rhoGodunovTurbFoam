@@ -95,25 +95,7 @@ int main(int argc, char *argv[])
 
 #include "createTimeControls.H"
 
-    // const bool useOldApproach = readSolutionApproach(mesh);
-
-    // Get reference values for damping
-    const dimensionedScalar T_inf(
-        "T_inf",
-        thermo.T().dimensions(),
-        readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("T")));
-    const dimensionedScalar p_inf(
-        "p_inf",
-        thermo.p().dimensions(),
-        readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("p")));
-    const dimensionedScalar rho_inf(
-        "rho_inf",
-        rho.dimensions(),
-        readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("rho")));
-    const dimensionedVector U_inf(
-        "U_inf",
-        U.dimensions(),
-        vector(mesh.solutionDict().subDict("freestreamProperties").lookup("U")));
+    const bool useOldApproach = readSolutionApproach(mesh);
 
     Info << "Starting time loop" << endl;
 
