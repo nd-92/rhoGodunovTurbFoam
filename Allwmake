@@ -1,3 +1,5 @@
 #!/bin/sh
 wclean rhoGodunovTurbFoam
 wmake rhoGodunovTurbFoam
+wclean acousticCentralFoam
+wmake acousticCentralFoam
