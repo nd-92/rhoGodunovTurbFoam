@@ -1,5 +1,7 @@
 EXE_INC = \
-    -IBCs/lnInclude \
+    -IBCs/rho \
+    -IBCs/T \
+    -IBCs/U \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/transportModels/compressible/lnInclude \
@@ -17,7 +19,6 @@ EXE_LIBS = \
     -lcompressibleTransportModels \
     -lfluidThermophysicalModels \
     -lspecie \
-    -lrhoCentralFoam \
     -lturbulenceModels \
     -lcompressibleTurbulenceModels \
     -lthermoTools \
