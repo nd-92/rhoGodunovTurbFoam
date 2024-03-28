@@ -51,6 +51,9 @@ SourceFiles
 #include "wallFvPatch.H"
 #include "shockSensor.H"
 #include "fvCFD.H"
+#include "buiFlux.H"
+#include "slau2Flux.H"
+#include "slauFlux.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

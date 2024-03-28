@@ -44,7 +44,7 @@ if (useOldApproach)
         // Compute p from rho
         thermo.p().ref() = rho() / thermo.psi();
         thermo.p().correctBoundaryConditions();
-        rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
+        // rho.boundaryFieldRef() == thermo.psi().boundaryField() * thermo.p().boundaryField();
     }
 }
 else

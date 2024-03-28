@@ -43,6 +43,8 @@ Author
 #include "surfaceFieldsFwd.H"
 #include "BarthJespersenLimiter.H"
 #include "VenkatakrishnanLimiter.H"
+#include "WangLimiter.H"
+#include "MichalakGoochLimiter.H"
 
 namespace Foam
 {

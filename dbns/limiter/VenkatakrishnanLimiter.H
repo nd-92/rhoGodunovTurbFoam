@@ -53,7 +53,7 @@ namespace Foam
         // Private data
 
         //- Limiter value
-        const scalar kCubed_ = 125;
+        const scalar kCubed_ = 1;
 
     public:
         // Constructor

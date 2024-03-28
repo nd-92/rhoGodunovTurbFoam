@@ -41,10 +41,12 @@ namespace Foam
 
     /* * * * * * * * * * * * * * * Private Static Data * * * * * * * * * * * * * */
 
-#define makeBasicNumericFluxForAllLimiters(Flux)       \
-    makeBasicNumericFlux(Flux, firstOrderLimiter);     \
-    makeBasicNumericFlux(Flux, BarthJespersenLimiter); \
-    makeBasicNumericFlux(Flux, VenkatakrishnanLimiter);
+#define makeBasicNumericFluxForAllLimiters(Flux)        \
+    makeBasicNumericFlux(Flux, firstOrderLimiter);      \
+    makeBasicNumericFlux(Flux, BarthJespersenLimiter);  \
+    makeBasicNumericFlux(Flux, VenkatakrishnanLimiter); \
+    makeBasicNumericFlux(Flux, WangLimiter);            \
+    makeBasicNumericFlux(Flux, MichalakGoochLimiter);
 
     makeBasicNumericFluxForAllLimiters(buiFlux);
     makeBasicNumericFluxForAllLimiters(slauFlux);
