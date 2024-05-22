@@ -54,20 +54,21 @@ namespace Foam
     {
     public:
         // Constructor
-        constexpr inline rungeKutta(){};
+        inline constexpr rungeKutta(){};
 
         // Destructor
         inline ~rungeKutta(){};
 
         // Return constexpr Runge-Kutta coefficient
-        constexpr inline scalar beta(const uint8_t i) const
+        inline constexpr scalar beta(const uint8_t i) const
         {
             return beta_[i];
         }
 
     private:
         // Runge-Kutta coefficients
-        const scalar beta_[4] = {0.1100, 0.2766, 0.500, 1.000};
+        static constexpr const std::array<scalar, 4> beta_ = {0.1100, 0.2766, 0.500, 1.000};
+        // static constexpr const scalar beta_[4] = {0.1100, 0.2766, 0.500, 1.000};
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

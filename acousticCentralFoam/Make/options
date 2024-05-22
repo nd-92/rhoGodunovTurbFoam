@@ -23,4 +23,5 @@ EXE_LIBS = \
     -lcompressibleTurbulenceModels \
     -lthermoTools \
     -ldynamicFvMesh \
-    -ltopoChangerFvMesh
+    -ltopoChangerFvMesh \
+    -lfieldFunctionObjects

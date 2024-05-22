@@ -40,7 +40,7 @@ Description
 #include "pointMesh.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
-#include "rungeKutta.H"
+// #include "rungeKutta.H"
 #include "acousticCourantNo.H"
 #include "shockSensor.H"
 #include "numericFluxes.H"
@@ -90,6 +90,9 @@ int main(int argc, char *argv[])
 #include "createTimeControls.H"
 
     const bool useOldApproach = readSolutionApproach(mesh);
+
+    // Runge-Kutta coefficient
+    constexpr const std::array<scalar, 4> beta = {0.1100, 0.2766, 0.5, 1};
 
     Info << "Starting time loop" << endl;
 

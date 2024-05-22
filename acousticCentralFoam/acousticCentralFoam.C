@@ -62,7 +62,8 @@ int main(int argc, char *argv[])
 #include "addCheckCaseOptions.H"
 #include "setRootCaseLists.H"
 #include "createTime.H"
-#include "createDynamicFvMesh.H"
+#include "createMesh.H"
+// #include "createDynamicFvMesh.H"
 #include "createFields.H"
 #include "createFieldRefs.H"
 #include "createTimeControls.H"
@@ -70,8 +71,6 @@ int main(int argc, char *argv[])
     turbulence->validate();
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "readFluxScheme.H"
 
     const dimensionedScalar v_zero(dimVolume / dimTime, Zero);
 
@@ -96,7 +95,7 @@ int main(int argc, char *argv[])
             ++runTime;
 
             // Do any mesh changes
-            mesh.update();
+            // mesh.update();
         }
 
         // --- Directed interpolation of primitive fields onto faces
@@ -127,15 +126,16 @@ int main(int argc, char *argv[])
         phiv_neg.setOriented(false);
 
         // Make fluxes relative to mesh-motion
-        if (mesh.moving())
-        {
-            surfaceScalarField meshPhi(mesh.phi());
-            meshPhi.setOriented(false);
-            phiv_pos -= meshPhi;
-            phiv_neg -= meshPhi;
-        }
+        // if (mesh.moving())
+        // {
+        //     surfaceScalarField meshPhi(mesh.phi());
+        //     meshPhi.setOriented(false);
+        //     phiv_pos -= meshPhi;
+        //     phiv_neg -= meshPhi;
+        // }
 
         const volScalarField c("c", sqrt(thermo.Cp() / thermo.Cv() * rPsi));
+
         const surfaceScalarField cSf_pos("cSf_pos", interpolate(c, pos, T.name()) * mesh.magSf());
 
         const surfaceScalarField cSf_neg("cSf_neg", interpolate(c, neg, T.name()) * mesh.magSf());
@@ -144,17 +144,11 @@ int main(int argc, char *argv[])
 
         const surfaceScalarField am("am", min(min(phiv_pos - cSf_pos, phiv_neg - cSf_neg), v_zero));
 
-        surfaceScalarField a_pos("a_pos", ap / (ap - am));
+        const surfaceScalarField a_pos("a_pos", ap / (ap - am));
 
         surfaceScalarField amaxSf("amaxSf", max(mag(am), mag(ap)));
 
-        surfaceScalarField aSf("aSf", am * a_pos);
-
-        if (fluxScheme == "Tadmor")
-        {
-            aSf = -0.5 * amaxSf;
-            a_pos = 0.5;
-        }
+        const surfaceScalarField aSf("aSf", am * a_pos);
 
         const surfaceScalarField a_neg("a_neg", 1.0 - a_pos);
 
@@ -211,15 +205,15 @@ int main(int argc, char *argv[])
 
         const surfaceVectorField phiUp(phiU + (a_pos * p_pos + a_neg * p_neg) * mesh.Sf());
 
-        surfaceScalarField phiEp("phiEp", aphiv_pos * (rho_pos * (e_pos + 0.5 * magSqr(U_pos)) + p_pos) + aphiv_neg * (rho_neg * (e_neg + 0.5 * magSqr(U_neg)) + p_neg) + aSf * p_pos - aSf * p_neg);
+        const surfaceScalarField phiEp("phiEp", aphiv_pos * (rho_pos * (e_pos + 0.5 * magSqr(U_pos)) + p_pos) + aphiv_neg * (rho_neg * (e_neg + 0.5 * magSqr(U_neg)) + p_neg) + aSf * p_pos - aSf * p_neg);
 
         // Make flux for pressure-work absolute
-        if (mesh.moving())
-        {
-            surfaceScalarField meshPhi(mesh.phi());
-            meshPhi.setOriented(false);
-            phiEp += meshPhi * (a_pos * p_pos + a_neg * p_neg);
-        }
+        // if (mesh.moving())
+        // {
+        //     surfaceScalarField meshPhi(mesh.phi());
+        //     meshPhi.setOriented(false);
+        //     phiEp += meshPhi * (a_pos * p_pos + a_neg * p_neg);
+        // }
 
         const volScalarField muEff("muEff", turbulence->muEff());
         const volTensorField tauMC("tauMC", muEff * dev2(Foam::T(fvc::grad(U))));
