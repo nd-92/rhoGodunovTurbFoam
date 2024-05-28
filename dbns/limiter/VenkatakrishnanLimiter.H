@@ -53,7 +53,7 @@ namespace Foam
         // Private data
 
         //- Limiter value
-        const scalar kCubed_ = 1;
+        static constexpr const scalar kCubed_ = 125;
 
     public:
         // Constructor
@@ -73,10 +73,10 @@ namespace Foam
         {
             const scalar epsilonSquare = kCubed_ * cellVolume;
 
-            if (mag(extrapolate) < SMALL)                                        //
-            {                                                                    //
-                return;                                                          //
-            }                                                                    //
+            if (mag(extrapolate) < SMALL) //
+            {                             //
+                return;                   //
+            } //
             else if (extrapolate > VSMALL)                                       //
             {                                                                    //
                 lim = max                                                        //
@@ -102,7 +102,7 @@ namespace Foam
                             lim                                                  //
                             )                                                    //
                     );                                                           //
-            }                                                                    //
+            } //
             else if (extrapolate < VSMALL)                                       //
             {                                                                    //
                 lim = max                                                        //
@@ -128,7 +128,7 @@ namespace Foam
                             lim                                                  //
                             )                                                    //
                     );                                                           //
-            }                                                                    //
+            } //
         }
 
         //- Set Type limiter

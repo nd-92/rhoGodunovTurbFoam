@@ -40,39 +40,9 @@ Description
 #include "pointMesh.H"
 #include "pointFields.H"
 #include "volPointInterpolation.H"
-// #include "rungeKutta.H"
 #include "acousticCourantNo.H"
 #include "shockSensor.H"
 #include "numericFluxes.H"
-
-bool readSolutionApproach(const fvMesh &mesh)
-{
-    word solutionApproach = "new";
-
-    if (mesh.schemesDict().readIfPresent("solutionApproach", solutionApproach))
-    {
-        if (solutionApproach == "old")
-        {
-            Info << "solutionApproach: " << solutionApproach << endl;
-            return true;
-        }
-        else if (solutionApproach == "new")
-        {
-            Info << "solutionApproach: " << solutionApproach << endl;
-            return false;
-        }
-        else
-        {
-            FatalErrorInFunction
-                << "solutionApproach: " << solutionApproach
-                << " is not a valid choice. "
-                << "Options are: old, new"
-                << abort(FatalError);
-            return false;
-        }
-    }
-    return false;
-};
 
 int main(int argc, char *argv[])
 {
@@ -86,10 +56,7 @@ int main(int argc, char *argv[])
 #include "createTime.H"
 #include "createMesh.H"
 #include "createFields.H"
-
 #include "createTimeControls.H"
-
-    const bool useOldApproach = readSolutionApproach(mesh);
 
     // Runge-Kutta coefficient
     constexpr const std::array<scalar, 4> beta = {0.1100, 0.2766, 0.5, 1};

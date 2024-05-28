@@ -94,7 +94,7 @@ namespace Foam
 #endif
 
         //- Selector
-        inline static autoPtr<basicNumericFlux> New(
+        [[nodiscard]] inline static autoPtr<basicNumericFlux> New(
             const volScalarField &p,
             const volVectorField &U,
             const volScalarField &T,
@@ -124,7 +124,7 @@ namespace Foam
         // Member functions
 
         //- Return mesh reference
-        inline const fvMesh &mesh() const
+        [[nodiscard]] inline const fvMesh &mesh() const
         {
             return mesh_;
         }

@@ -241,7 +241,7 @@ namespace Foam
         // Member functions
 
         //- Return limiter
-        inline const GeoFieldType &phiLimiter() const
+        [[nodiscard]] inline const GeoFieldType &phiLimiter() const
         {
             return phiLimiter_;
         }

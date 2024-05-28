@@ -127,19 +127,19 @@ namespace Foam
         inline void operator=(const numericFlux &);
 
         //- Return internal field of mass flux
-        inline const scalarField &rhoFluxI() const
+        [[nodiscard]] inline const scalarField &rhoFluxI() const
         {
             return rhoFlux_.internalField();
         }
 
         //- Return internal field of momentum flux
-        inline const vectorField &rhoUFluxI() const
+        [[nodiscard]] inline const vectorField &rhoUFluxI() const
         {
             return rhoUFlux_.internalField();
         }
 
         //- Return access to internal field of energy flux
-        inline const scalarField &rhoEFluxI() const
+        [[nodiscard]] inline const scalarField &rhoEFluxI() const
         {
             return rhoEFlux_.internalField();
         }
@@ -205,19 +205,19 @@ namespace Foam
         // Return fluxes
 
         //- Return density flux
-        virtual inline const surfaceScalarField &rhoFlux() const
+        [[nodiscard]] virtual inline const surfaceScalarField &rhoFlux() const
         {
             return rhoFlux_;
         }
 
         //- Return velocity flux
-        virtual inline const surfaceVectorField &rhoUFlux() const
+        [[nodiscard]] virtual inline const surfaceVectorField &rhoUFlux() const
         {
             return rhoUFlux_;
         }
 
         //- Return energy flux
-        virtual inline const surfaceScalarField &rhoEFlux() const
+        [[nodiscard]] virtual inline const surfaceScalarField &rhoEFlux() const
         {
             return rhoEFlux_;
         }

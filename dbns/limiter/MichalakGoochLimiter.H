@@ -49,16 +49,13 @@ namespace Foam
         // Private data
 
         //- Coefficient
-        const scalar k_;
+        static constexpr const scalar k_ = 1.5;
 
     public:
         // Constructors
 
         //- Construct null
-        MichalakGoochLimiter()
-            : k_(1.5)
-        {
-        }
+        MichalakGoochLimiter() {}
 
         // Destructor - default
 
