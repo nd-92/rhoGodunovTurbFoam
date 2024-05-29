@@ -709,7 +709,7 @@ namespace Foam
 
                     forAll(pp, facei)
                     {
-                        Flux::evaluateFreestreamFlux(
+                        Flux::evaluateFlux(
                             pRhoFlux[facei],
                             pRhoUFlux[facei],
                             pRhoEFlux[facei],
