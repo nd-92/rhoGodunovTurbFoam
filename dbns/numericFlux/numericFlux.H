@@ -93,8 +93,8 @@ namespace Foam
         const basicThermo &thermo_;
 
         //-Thermodynamic properties
-        const volScalarField Cv_;
-        volScalarField R_;
+        // const volScalarField Cv_;
+        // volScalarField R_;
 
         // Fluxes
 
@@ -165,8 +165,6 @@ namespace Foam
               buiEps_(fvc::interpolate(upwindingFactor)),
               upwindingFactorMin_(this->mesh().schemesDict().subDict("divSchemes").subDict("dbns").lookupOrDefault("epsilonMin", 1.0)),
               thermo_(thermo),
-              Cv_(thermo.Cv()),
-              R_(thermo.Cp() - thermo.Cv()),
               rhoFlux_(
                   IOobject(
                       "phi",
@@ -196,9 +194,7 @@ namespace Foam
               gradT(fvc::grad(T)){};
 
         //- Destructor
-        inline virtual ~numericFlux()
-        {
-        }
+        inline virtual ~numericFlux(){};
 
         // Member Functions
 
@@ -223,289 +219,6 @@ namespace Foam
         }
 
         // Update fluxes based on current state
-
-        //- Compute flux
-        // inline void computeFlux()
-        // {
-        //     // Update the upwinding factor
-        //     buiEps_ = (linearInterpolate(upwindingFactor_) * (1 - upwindingFactorMin_)) + upwindingFactorMin_;
-
-        //     // Get face-to-cell addressing: face area point from owner to neighbour
-        //     const labelUList &owner = this->mesh().owner();
-        //     const labelUList &neighbour = this->mesh().neighbour();
-
-        //     // Get the face area vector
-        //     const surfaceVectorField &Sf = this->mesh().Sf();
-        //     const surfaceScalarField &magSf = this->mesh().magSf();
-
-        //     const volVectorField &cellCentre = this->mesh().C();
-        //     const surfaceVectorField &faceCentre = this->mesh().Cf();
-
-        //     // Get gradients
-        //     // Coupled patch update on gradients moved into gradScheme.C
-        //     // HJ, 22/Apr/2016;
-
-        //     // Changed return type for gradient cacheing.  HJ, 22/Apr/2016
-        //     const tmp<volVectorField> tgradP = fvc::grad(p_);
-        //     const volVectorField &gradP = tgradP();
-
-        //     const tmp<volTensorField> tgradU = fvc::grad(U_);
-        //     const volTensorField &gradU = tgradU();
-
-        //     const tmp<volVectorField> tgradT = fvc::grad(T_);
-        //     const volVectorField &gradT = tgradT();
-
-        //     const MDLimiter<scalar, Limiter> scalarPLimiter(
-        //         this->p_,
-        //         gradP);
-
-        //     const MDLimiter<vector, Limiter> vectorULimiter(
-        //         this->U_,
-        //         gradU);
-
-        //     const MDLimiter<scalar, Limiter> scalarTLimiter(
-        //         this->T_,
-        //         gradT);
-
-        //     // Get limiters
-        //     const volScalarField &pLimiter = scalarPLimiter.phiLimiter();
-        //     const volVectorField &ULimiter = vectorULimiter.phiLimiter();
-        //     const volScalarField &TLimiter = scalarTLimiter.phiLimiter();
-
-        //     // Calculate fluxes at internal faces
-        //     forAll(owner, faceI)
-        //     {
-        //         const label own = owner[faceI];
-        //         const label nei = neighbour[faceI];
-
-        //         const vector deltaRLeft = faceCentre[faceI] - cellCentre[own];
-        //         const vector deltaRRight = faceCentre[faceI] - cellCentre[nei];
-
-        //         // calculate fluxes with reconstructed primitive variables at faces
-        //         Flux::evaluateFlux(
-        //             rhoFlux_[faceI],
-        //             rhoUFlux_[faceI],
-        //             rhoEFlux_[faceI],
-        //             p_[own] + pLimiter[own] * (deltaRLeft & gradP[own]),
-        //             p_[nei] + pLimiter[nei] * (deltaRRight & gradP[nei]),
-        //             U_[own] + cmptMultiply(ULimiter[own], (deltaRLeft & gradU[own])),
-        //             U_[nei] + cmptMultiply(ULimiter[nei], (deltaRRight & gradU[nei])),
-        //             T_[own] + TLimiter[own] * (deltaRLeft & gradT[own]),
-        //             T_[nei] + TLimiter[nei] * (deltaRRight & gradT[nei]),
-        //             R_[own],
-        //             R_[nei],
-        //             Cv_[own],
-        //             Cv_[nei],
-        //             Sf[faceI],
-        //             magSf[faceI],
-        //             buiEps_[faceI]);
-        //         // Flux::evaluateFlux(
-        //         //     rhoFlux_[faceI],
-        //         //     rhoUFlux_[faceI],
-        //         //     rhoEFlux_[faceI],
-        //         //     p_[own] + (deltaRLeft & gradP[own]),
-        //         //     p_[nei] + (deltaRRight & gradP[nei]),
-        //         //     U_[own] + (deltaRLeft & gradU[own]),
-        //         //     U_[nei] + (deltaRRight & gradU[nei]),
-        //         //     T_[own] + (deltaRLeft & gradT[own]),
-        //         //     T_[nei] + (deltaRRight & gradT[nei]),
-        //         //     R_[own],
-        //         //     R_[nei],
-        //         //     Cv_[own],
-        //         //     Cv_[nei],
-        //         //     Sf[faceI],
-        //         //     magSf[faceI],
-        //         //     // buiEps_[faceI]);
-        //         //     1.0);
-        //     }
-
-        //     // Update boundary field and values
-        //     forAll(rhoFlux_.boundaryField(), patchi)
-        //     {
-        //         const fvPatch &curPatch = p_.boundaryField()[patchi].patch();
-
-        //         // Fluxes
-        //         fvsPatchScalarField &pRhoFlux = rhoFlux_.boundaryFieldRef()[patchi];
-        //         fvsPatchVectorField &pRhoUFlux = rhoUFlux_.boundaryFieldRef()[patchi];
-        //         fvsPatchScalarField &pRhoEFlux = rhoEFlux_.boundaryFieldRef()[patchi];
-
-        //         // Patch fields
-        //         const fvPatchScalarField &pp = p_.boundaryField()[patchi];
-        //         const vectorField &pU = U_.boundaryField()[patchi];
-        //         const scalarField &pT = T_.boundaryField()[patchi];
-
-        //         const scalarField &pCv = Cv_.boundaryField()[patchi];
-        //         const scalarField &pR = R_.boundaryField()[patchi];
-
-        //         // Gradients
-        //         const fvPatchVectorField &pGradP = gradP.boundaryField()[patchi];
-        //         const fvPatchTensorField &pGradU = gradU.boundaryField()[patchi];
-        //         const fvPatchVectorField &pGradT = gradT.boundaryField()[patchi];
-
-        //         // Limiters
-        //         const fvPatchScalarField &pPatchLim = pLimiter.boundaryField()[patchi];
-        //         const fvPatchVectorField &UPatchLim = ULimiter.boundaryField()[patchi];
-        //         const fvPatchScalarField &TPatchLim = TLimiter.boundaryField()[patchi];
-
-        //         // Face areas
-        //         const fvsPatchVectorField &pSf = Sf.boundaryField()[patchi];
-        //         const fvsPatchScalarField &pMagSf = magSf.boundaryField()[patchi];
-
-        //         if (pp.coupled())
-        //         {
-        //             // Coupled patch
-        //             const scalarField ppLeft = p_.boundaryField()[patchi].patchInternalField();
-        //             const scalarField ppRight = p_.boundaryField()[patchi].patchNeighbourField();
-
-        //             const vectorField pULeft = U_.boundaryField()[patchi].patchInternalField();
-        //             const vectorField pURight = U_.boundaryField()[patchi].patchNeighbourField();
-
-        //             const scalarField pTLeft = T_.boundaryField()[patchi].patchInternalField();
-        //             const scalarField pTRight = T_.boundaryField()[patchi].patchNeighbourField();
-
-        //             // Gradients
-        //             const vectorField pgradPLeft = pGradP.patchInternalField();
-        //             const vectorField pgradPRight = pGradP.patchNeighbourField();
-
-        //             const tensorField pgradULeft = pGradU.patchInternalField();
-        //             const tensorField pgradURight = pGradU.patchNeighbourField();
-
-        //             const vectorField pgradTLeft = pGradT.patchInternalField();
-        //             const vectorField pgradTRight = pGradT.patchNeighbourField();
-
-        //             // Geometry: call the raw cell-to-face vector by calling
-        //             // the base patch (cell-to-face) delta coefficient
-        //             // Work out the right delta from the cell-to-cell delta
-        //             // across the coupled patch and left delta
-        //             const vectorField pDeltaRLeft = curPatch.fvPatch::delta();
-        //             const vectorField pDeltaRRight = pDeltaRLeft - curPatch.delta();
-
-        //             // Limiters
-
-        //             const scalarField ppLimiterLeft = pPatchLim.patchInternalField();
-        //             const scalarField ppLimiterRight = pPatchLim.patchNeighbourField();
-
-        //             const vectorField pULimiterLeft = UPatchLim.patchInternalField();
-        //             const vectorField pULimiterRight = UPatchLim.patchNeighbourField();
-
-        //             const scalarField pTLimiterLeft = TPatchLim.patchInternalField();
-        //             const scalarField pTLimiterRight = TPatchLim.patchNeighbourField();
-
-        //             forAll(pp, facei)
-        //             {
-        //                 Flux::evaluateFlux(
-        //                     pRhoFlux[facei],
-        //                     pRhoUFlux[facei],
-        //                     pRhoEFlux[facei],
-        //                     ppLeft[facei] + ppLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradPLeft[facei]),
-        //                     ppRight[facei] + ppLimiterRight[facei] * (pDeltaRRight[facei] & pgradPRight[facei]),
-        //                     pULeft[facei] + cmptMultiply(pULimiterLeft[facei], pDeltaRLeft[facei] & pgradULeft[facei]),
-        //                     pURight[facei] + cmptMultiply(pULimiterRight[facei], pDeltaRRight[facei] & pgradURight[facei]),
-        //                     pTLeft[facei] + pTLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradTLeft[facei]),
-        //                     pTRight[facei] + pTLimiterRight[facei] * (pDeltaRRight[facei] & pgradTRight[facei]),
-        //                     pR[facei],
-        //                     pR[facei],
-        //                     pCv[facei],
-        //                     pCv[facei],
-        //                     pSf[facei],
-        //                     pMagSf[facei],
-        //                     buiEps_[facei]);
-        //                 // Flux::evaluateFlux(
-        //                 //     pRhoFlux[facei],
-        //                 //     pRhoUFlux[facei],
-        //                 //     pRhoEFlux[facei],
-        //                 //     ppLeft[facei] + (pDeltaRLeft[facei] & pgradPLeft[facei]),
-        //                 //     ppRight[facei] + (pDeltaRRight[facei] & pgradPRight[facei]),
-        //                 //     pULeft[facei] + pDeltaRLeft[facei] & pgradULeft[facei],
-        //                 //     pURight[facei] + pDeltaRRight[facei] & pgradURight[facei],
-        //                 //     pTLeft[facei] + (pDeltaRLeft[facei] & pgradTLeft[facei]),
-        //                 //     pTRight[facei] + (pDeltaRRight[facei] & pgradTRight[facei]),
-        //                 //     pR[facei],
-        //                 //     pR[facei],
-        //                 //     pCv[facei],
-        //                 //     pCv[facei],
-        //                 //     pSf[facei],
-        //                 //     pMagSf[facei],
-        //                 //     // buiEps_[facei]);
-        //                 //     1.0);
-        //             }
-        //         }
-        //         else
-        //         {
-        //             // Coupled patch
-        //             // const scalarField pp = p_.boundaryField()[patchi].patchInternalField();
-        //             // const scalarField ppRight = p_.boundaryField()[patchi].patchNeighbourField();
-
-        //             // const vectorField pU = U_.boundaryField()[patchi].patchInternalField();
-        //             // const vectorField pURight = U_.boundaryField()[patchi].patchNeighbourField();
-
-        //             // const scalarField pT = T_.boundaryField()[patchi].patchInternalField();
-        //             // const scalarField pT = T_.boundaryField()[patchi].patchNeighbourField();
-
-        //             // Gradients
-        //             const vectorField pgradP = pGradP.patchInternalField();
-        //             // const vectorField pgradPRight = pGradP.patchNeighbourField();
-
-        //             const tensorField pgradU = pGradU.patchInternalField();
-        //             // const tensorField pgradURight = pGradU.patchNeighbourField();
-
-        //             const vectorField pgradT = pGradT.patchInternalField();
-        //             // const vectorField pgradTRight = pGradT.patchNeighbourField();
-
-        //             // Geometry: call the raw cell-to-face vector by calling
-        //             // the base patch (cell-to-face) delta coefficient
-        //             // Work out the right delta from the cell-to-cell delta
-        //             // across the coupled patch and left delta
-        //             const vectorField pDeltaRLeft = curPatch.fvPatch::delta();
-        //             const vectorField pDeltaRRight = pDeltaRLeft - curPatch.delta();
-
-        //             // Limiters
-
-        //             const scalarField ppLimiter = pPatchLim.patchInternalField();
-        //             // const scalarField ppLimiterRight = pPatchLim.patchNeighbourField();
-
-        //             const vectorField pULimiter = UPatchLim.patchInternalField();
-        //             // const vectorField pULimiterRight = UPatchLim.patchNeighbourField();
-
-        //             const scalarField pTLimiter = TPatchLim.patchInternalField();
-        //             // const scalarField pTLimiterRight = TPatchLim.patchNeighbourField();
-
-        //             forAll(pp, facei)
-        //             {
-        //                 // Calculate fluxes
-        //                 Flux::evaluateFlux(
-        //                     pRhoFlux[facei],
-        //                     pRhoUFlux[facei],
-        //                     pRhoEFlux[facei],
-
-        //                     pp[facei] + ppLimiter[facei] * (pDeltaRLeft[facei] & pgradP[facei]),
-        //                     pp[facei] + ppLimiter[facei] * (pDeltaRRight[facei] & pgradP[facei]),
-        //                     pU[facei] + cmptMultiply(pULimiter[facei], pDeltaRLeft[facei] & pgradU[facei]),
-        //                     pU[facei] + cmptMultiply(pULimiter[facei], pDeltaRRight[facei] & pgradU[facei]),
-        //                     pT[facei] + pTLimiter[facei] * (pDeltaRLeft[facei] & pgradT[facei]),
-        //                     pT[facei] + pTLimiter[facei] * (pDeltaRRight[facei] & pgradT[facei]),
-
-        //                     // pp[facei],
-        //                     // pp[facei],
-        //                     // pU[facei],
-        //                     // pU[facei],
-        //                     // pT[facei],
-        //                     // pT[facei],
-
-        //                     pR[facei],
-        //                     pR[facei],
-        //                     pCv[facei],
-        //                     pCv[facei],
-        //                     pSf[facei],
-        //                     pMagSf[facei],
-        //                     buiEps_[facei]);
-        //                 // 1.0);
-        //             }
-        //         }
-        //     }
-        // }
-
-        // template <class Flux, class Limiter>
         inline void computeFlux()
         {
             buiEps_ = (linearInterpolate(upwindingFactor_) * (1 - upwindingFactorMin_)) + upwindingFactorMin_;
@@ -596,23 +309,14 @@ namespace Foam
                 if (pp.coupled())
                 {
                     // Coupled patch
-                    const scalarField ppLeft =
-                        p_.boundaryField()[patchi].patchInternalField();
+                    const scalarField ppLeft = p_.boundaryField()[patchi].patchInternalField();
+                    const scalarField ppRight = p_.boundaryField()[patchi].patchNeighbourField();
 
-                    const scalarField ppRight =
-                        p_.boundaryField()[patchi].patchNeighbourField();
+                    const vectorField pULeft = U_.boundaryField()[patchi].patchInternalField();
+                    const vectorField pURight = U_.boundaryField()[patchi].patchNeighbourField();
 
-                    const vectorField pULeft =
-                        U_.boundaryField()[patchi].patchInternalField();
-
-                    const vectorField pURight =
-                        U_.boundaryField()[patchi].patchNeighbourField();
-
-                    const scalarField pTLeft =
-                        T_.boundaryField()[patchi].patchInternalField();
-
-                    const scalarField pTRight =
-                        T_.boundaryField()[patchi].patchNeighbourField();
+                    const scalarField pTLeft = T_.boundaryField()[patchi].patchInternalField();
+                    const scalarField pTRight = T_.boundaryField()[patchi].patchNeighbourField();
 
                     // Gradients
                     const vectorField pgradPLeft = pGradP.patchInternalField();
@@ -638,10 +342,10 @@ namespace Foam
                     else
                     {
                         const vectorField faceCenter = pp.patch().Cf();
-                        const vectorField pCellCenterLeft = pCellCenter.patchInternalField();
-                        const vectorField pCellCenterRight = pCellCenter.patchNeighbourField();
-                        pDeltaRLeft = faceCenter - pCellCenterLeft;
-                        pDdeltaRRight = faceCenter - pCellCenterRight;
+                        // const vectorField pCellCenterLeft = pCellCenter.patchInternalField();
+                        // const vectorField pCellCenterRight = pCellCenter.patchNeighbourField();
+                        pDeltaRLeft = faceCenter - pCellCenter.patchInternalField();
+                        pDdeltaRRight = faceCenter - pCellCenter.patchNeighbourField();
                     }
 
                     forAll(pp, facei)
@@ -650,19 +354,12 @@ namespace Foam
                             pRhoFlux[facei],
                             pRhoUFlux[facei],
                             pRhoEFlux[facei],
-
                             ppLeft[facei] + (pDeltaRLeft[facei] & pgradPLeft[facei]),
-
                             ppRight[facei] + (pDdeltaRRight[facei] & pgradPRight[facei]),
-
                             pULeft[facei] + (pDeltaRLeft[facei] & pgradULeft[facei]),
-
                             pURight[facei] + (pDdeltaRRight[facei] & pgradURight[facei]),
-
                             pTLeft[facei] + (pDeltaRLeft[facei] & pgradTLeft[facei]),
-
                             pTRight[facei] + (pDdeltaRRight[facei] & pgradTRight[facei]),
-
                             pR[facei],
                             pR[facei],
                             pCv[facei],
@@ -698,14 +395,9 @@ namespace Foam
                 }
                 else
                 {
-                    const scalarField ppLeft =
-                        p_.boundaryField()[patchi].patchInternalField();
-
-                    const vectorField pULeft =
-                        U_.boundaryField()[patchi].patchInternalField();
-
-                    const scalarField pTLeft =
-                        T_.boundaryField()[patchi].patchInternalField();
+                    const scalarField ppLeft = p_.boundaryField()[patchi].patchInternalField();
+                    const vectorField pULeft = U_.boundaryField()[patchi].patchInternalField();
+                    const scalarField pTLeft = T_.boundaryField()[patchi].patchInternalField();
 
                     forAll(pp, facei)
                     {

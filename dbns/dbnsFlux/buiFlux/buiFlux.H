@@ -244,16 +244,9 @@ namespace Foam
             const scalar fluxRight15 = hRight * fluxRight11;
 
             // Step 10: compute face flux 5-vector
-            const scalar flux1 = 0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
-
-            const vector flux24 = 0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
-
-            const scalar flux5 = 0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
-
-            // Compute private data
-            rhoFlux = flux1 * magSf;
-            rhoUFlux = flux24 * magSf;
-            rhoEFlux = flux5 * magSf;
+            rhoFlux = (0.5 * (fluxLeft11 + fluxRight11 - (buiEps * (diffF11 + diffF21 + diffF31)))) * magSf;
+            rhoUFlux = (0.5 * (fluxLeft124 + fluxRight124 - (buiEps * (diffF124 + diffF224 + diffF324)))) * magSf;
+            rhoEFlux = (0.5 * (fluxLeft15 + fluxRight15 - (buiEps * (diffF15 + diffF25 + diffF35)))) * magSf;
         }
     };
 
