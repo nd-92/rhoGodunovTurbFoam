@@ -508,6 +508,8 @@ namespace Foam
         // template <class Flux, class Limiter>
         inline void computeFlux()
         {
+            buiEps_ = (linearInterpolate(upwindingFactor_) * (1 - upwindingFactorMin_)) + upwindingFactorMin_;
+
             // Get face-to-cell addressing: face area point from owner to neighbour
             const labelUList &owner = this->mesh().owner();
             const labelUList &neighbour = this->mesh().neighbour();
