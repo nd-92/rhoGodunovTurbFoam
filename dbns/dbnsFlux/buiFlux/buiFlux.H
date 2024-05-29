@@ -83,12 +83,12 @@ namespace Foam
             const scalar &buiEps) const
         {
             // Step 1: decode rho left and right:
-            scalar rhoLeft = pLeft / (RLeft * TLeft);
-            scalar rhoRight = pRight / (RRight * TRight);
+            const scalar rhoLeft = pLeft / (RLeft * TLeft);
+            const scalar rhoRight = pRight / (RRight * TRight);
 
             // Decode left and right total energy:
-            scalar eLeft = CvLeft * TLeft + 0.5 * magSqr(ULeft);
-            scalar eRight = CvRight * TRight + 0.5 * magSqr(URight);
+            const scalar eLeft = CvLeft * TLeft + 0.5 * magSqr(ULeft);
+            const scalar eRight = CvRight * TRight + 0.5 * magSqr(URight);
 
             // Adiabatic exponent is constant for ideal gas but if Cp=Cp(T)
             // it must be computed for each cell and evaluated at each face
@@ -97,7 +97,7 @@ namespace Foam
             const scalar kappaRight = (CvRight + RRight) / CvRight;
 
             // normal vector
-            vector normalVector = Sf / magSf;
+            const vector normalVector = Sf / magSf;
 
             // Compute left and right contravariant velocities:
             const scalar contrVLeft = (ULeft & normalVector);
@@ -123,8 +123,7 @@ namespace Foam
             const scalar kappaTilde = kappaLeft * wLeft + kappaRight * wRight;
 
             // Speed of sound
-            const scalar cTilde =
-                sqrt(max((kappaTilde - 1) * (hTilde - 0.5 * qTildeSquare), SMALL));
+            const scalar cTilde = sqrt(max((kappaTilde - 1) * (hTilde - 0.5 * qTildeSquare), SMALL));
 
             // Roe averaged contravariant velocity
             const scalar contrVTilde = (UTilde & normalVector);
@@ -138,11 +137,9 @@ namespace Foam
             // Step 4: compute wave strengths:
 
             // Roe and Pike - formulation
-            const scalar r1 =
-                (deltaP - rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
+            const scalar r1 = (deltaP - rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
             const scalar r2 = deltaRho - deltaP / sqr(cTilde);
-            const scalar r3 =
-                (deltaP + rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
+            const scalar r3 = (deltaP + rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
 
             // Step 5: compute l vectors
 
@@ -192,15 +189,9 @@ namespace Foam
 
             const scalar UL = ULeft & normalVector;
             const scalar UR = URight & normalVector;
-            const scalar cLeft = sqrt(
-                max(
-                    (kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)),
-                    SMALL));
+            const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
 
-            const scalar cRight = sqrt(
-                max(
-                    (kappaRight - 1) * (hRight - 0.5 * magSqr(URight)),
-                    SMALL));
+            const scalar cRight = sqrt(max((kappaRight - 1) * (hRight - 0.5 * magSqr(URight)), SMALL));
 
             // First eigenvalue: U - c
             scalar eps = 2 * max(0, (UR - cRight) - (UL - cLeft));
@@ -253,14 +244,11 @@ namespace Foam
             const scalar fluxRight15 = hRight * fluxRight11;
 
             // Step 10: compute face flux 5-vector
-            const scalar flux1 =
-                0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
+            const scalar flux1 = 0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
 
-            const vector flux24 =
-                0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
+            const vector flux24 = 0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
 
-            const scalar flux5 =
-                0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
+            const scalar flux5 = 0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
 
             // Compute private data
             rhoFlux = flux1 * magSf;
@@ -287,12 +275,12 @@ namespace Foam
             const scalar &buiEps) const
         {
             // Step 1: decode rho left and right:
-            scalar rhoLeft = pLeft / (RLeft * TLeft);
-            scalar rhoRight = pRight / (RRight * TRight);
+            const scalar rhoLeft = pLeft / (RLeft * TLeft);
+            const scalar rhoRight = pRight / (RRight * TRight);
 
             // Decode left and right total energy:
-            scalar eLeft = CvLeft * TLeft + 0.5 * magSqr(ULeft);
-            scalar eRight = CvRight * TRight + 0.5 * magSqr(URight);
+            const scalar eLeft = CvLeft * TLeft + 0.5 * magSqr(ULeft);
+            const scalar eRight = CvRight * TRight + 0.5 * magSqr(URight);
 
             // Adiabatic exponent is constant for ideal gas but if Cp=Cp(T)
             // it must be computed for each cell and evaluated at each face
@@ -301,7 +289,7 @@ namespace Foam
             const scalar kappaRight = (CvRight + RRight) / CvRight;
 
             // normal vector
-            vector normalVector = Sf / magSf;
+            const vector normalVector = Sf / magSf;
 
             // Compute left and right contravariant velocities:
             const scalar contrVLeft = (ULeft & normalVector);
@@ -327,8 +315,7 @@ namespace Foam
             const scalar kappaTilde = kappaLeft * wLeft + kappaRight * wRight;
 
             // Speed of sound
-            const scalar cTilde =
-                sqrt(max((kappaTilde - 1) * (hTilde - 0.5 * qTildeSquare), SMALL));
+            const scalar cTilde = sqrt(max((kappaTilde - 1) * (hTilde - 0.5 * qTildeSquare), SMALL));
 
             // Roe averaged contravariant velocity
             const scalar contrVTilde = (UTilde & normalVector);
@@ -342,11 +329,9 @@ namespace Foam
             // Step 4: compute wave strengths:
 
             // Roe and Pike - formulation
-            const scalar r1 =
-                (deltaP - rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
+            const scalar r1 = (deltaP - rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
             const scalar r2 = deltaRho - deltaP / sqr(cTilde);
-            const scalar r3 =
-                (deltaP + rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
+            const scalar r3 = (deltaP + rhoTilde * cTilde * deltaContrV) / (2.0 * sqr(cTilde));
 
             // Step 5: compute l vectors
 
@@ -396,15 +381,9 @@ namespace Foam
 
             const scalar UL = ULeft & normalVector;
             const scalar UR = URight & normalVector;
-            const scalar cLeft = sqrt(
-                max(
-                    (kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)),
-                    SMALL));
+            const scalar cLeft = sqrt(max((kappaLeft - 1) * (hLeft - 0.5 * magSqr(ULeft)), SMALL));
 
-            const scalar cRight = sqrt(
-                max(
-                    (kappaRight - 1) * (hRight - 0.5 * magSqr(URight)),
-                    SMALL));
+            const scalar cRight = sqrt(max((kappaRight - 1) * (hRight - 0.5 * magSqr(URight)), SMALL));
 
             // First eigenvalue: U - c
             scalar eps = 2 * max(0, (UR - cRight) - (UL - cLeft));
@@ -457,14 +436,11 @@ namespace Foam
             const scalar fluxRight15 = hRight * fluxRight11;
 
             // Step 10: compute face flux 5-vector
-            const scalar flux1 =
-                0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
+            const scalar flux1 = 0.5 * (fluxLeft11 + fluxRight11 - buiEps * (diffF11 + diffF21 + diffF31));
 
-            const vector flux24 =
-                0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
+            const vector flux24 = 0.5 * (fluxLeft124 + fluxRight124 - buiEps * (diffF124 + diffF224 + diffF324));
 
-            const scalar flux5 =
-                0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
+            const scalar flux5 = 0.5 * (fluxLeft15 + fluxRight15 - buiEps * (diffF15 + diffF25 + diffF35));
 
             // Compute private data
             rhoFlux = flux1 * magSf;
