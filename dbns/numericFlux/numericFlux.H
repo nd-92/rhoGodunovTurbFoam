@@ -299,24 +299,6 @@ namespace Foam
                     Sf[faceI],
                     magSf[faceI],
                     buiEps_[faceI]);
-                // Flux::evaluateFlux(
-                //     rhoFlux_[faceI],
-                //     rhoUFlux_[faceI],
-                //     rhoEFlux_[faceI],
-                //     p_[own] + (deltaRLeft & gradP[own]),
-                //     p_[nei] + (deltaRRight & gradP[nei]),
-                //     U_[own] + (deltaRLeft & gradU[own]),
-                //     U_[nei] + (deltaRRight & gradU[nei]),
-                //     T_[own] + (deltaRLeft & gradT[own]),
-                //     T_[nei] + (deltaRRight & gradT[nei]),
-                //     R_[own],
-                //     R_[nei],
-                //     Cv_[own],
-                //     Cv_[nei],
-                //     Sf[faceI],
-                //     magSf[faceI],
-                //     // buiEps_[faceI]);
-                //     1.0);
             }
 
             // Update boundary field and values
@@ -351,115 +333,72 @@ namespace Foam
                 const fvsPatchVectorField &pSf = Sf.boundaryField()[patchi];
                 const fvsPatchScalarField &pMagSf = magSf.boundaryField()[patchi];
 
-                if (pp.coupled())
+                // if (pp.coupled())
+                // {
+                // Coupled patch
+                const scalarField ppLeft = p_.boundaryField()[patchi].patchInternalField();
+                const scalarField ppRight = p_.boundaryField()[patchi].patchNeighbourField();
+
+                const vectorField pULeft = U_.boundaryField()[patchi].patchInternalField();
+                const vectorField pURight = U_.boundaryField()[patchi].patchNeighbourField();
+
+                const scalarField pTLeft = T_.boundaryField()[patchi].patchInternalField();
+                const scalarField pTRight = T_.boundaryField()[patchi].patchNeighbourField();
+
+                // Gradients
+                const vectorField pgradPLeft = pGradP.patchInternalField();
+                const vectorField pgradPRight = pGradP.patchNeighbourField();
+
+                const tensorField pgradULeft = pGradU.patchInternalField();
+                const tensorField pgradURight = pGradU.patchNeighbourField();
+
+                const vectorField pgradTLeft = pGradT.patchInternalField();
+                const vectorField pgradTRight = pGradT.patchNeighbourField();
+
+                // Geometry: call the raw cell-to-face vector by calling
+                // the base patch (cell-to-face) delta coefficient
+                // Work out the right delta from the cell-to-cell delta
+                // across the coupled patch and left delta
+                const vectorField pDeltaRLeft = curPatch.fvPatch::delta();
+                const vectorField pDdeltaRRight = pDeltaRLeft - curPatch.delta();
+
+                // Limiters
+
+                const scalarField ppLimiterLeft = pPatchLim.patchInternalField();
+                const scalarField ppLimiterRight = pPatchLim.patchNeighbourField();
+
+                const vectorField pULimiterLeft = UPatchLim.patchInternalField();
+                const vectorField pULimiterRight = UPatchLim.patchNeighbourField();
+
+                const scalarField pTLimiterLeft = TPatchLim.patchInternalField();
+                const scalarField pTLimiterRight = TPatchLim.patchNeighbourField();
+
+                forAll(pp, facei)
                 {
-                    // Coupled patch
-                    const scalarField ppLeft = p_.boundaryField()[patchi].patchInternalField();
-                    const scalarField ppRight = p_.boundaryField()[patchi].patchNeighbourField();
-
-                    const vectorField pULeft = U_.boundaryField()[patchi].patchInternalField();
-                    const vectorField pURight = U_.boundaryField()[patchi].patchNeighbourField();
-
-                    const scalarField pTLeft = T_.boundaryField()[patchi].patchInternalField();
-                    const scalarField pTRight = T_.boundaryField()[patchi].patchNeighbourField();
-
-                    // Gradients
-                    const vectorField pgradPLeft = pGradP.patchInternalField();
-                    const vectorField pgradPRight = pGradP.patchNeighbourField();
-
-                    const tensorField pgradULeft = pGradU.patchInternalField();
-                    const tensorField pgradURight = pGradU.patchNeighbourField();
-
-                    const vectorField pgradTLeft = pGradT.patchInternalField();
-                    const vectorField pgradTRight = pGradT.patchNeighbourField();
-
-                    // Geometry: call the raw cell-to-face vector by calling
-                    // the base patch (cell-to-face) delta coefficient
-                    // Work out the right delta from the cell-to-cell delta
-                    // across the coupled patch and left delta
-                    const vectorField pDeltaRLeft = curPatch.fvPatch::delta();
-                    const vectorField pDdeltaRRight = pDeltaRLeft - curPatch.delta();
-
-                    // Limiters
-
-                    const scalarField ppLimiterLeft = pPatchLim.patchInternalField();
-                    const scalarField ppLimiterRight = pPatchLim.patchNeighbourField();
-
-                    const vectorField pULimiterLeft = UPatchLim.patchInternalField();
-                    const vectorField pULimiterRight = UPatchLim.patchNeighbourField();
-
-                    const scalarField pTLimiterLeft = TPatchLim.patchInternalField();
-                    const scalarField pTLimiterRight = TPatchLim.patchNeighbourField();
-
-                    forAll(pp, facei)
-                    {
-                        Flux::evaluateFlux(
-                            pRhoFlux[facei],
-                            pRhoUFlux[facei],
-                            pRhoEFlux[facei],
-                            ppLeft[facei] + ppLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradPLeft[facei]),
-                            ppRight[facei] + ppLimiterRight[facei] * (pDdeltaRRight[facei] & pgradPRight[facei]),
-                            pULeft[facei] + cmptMultiply(pULimiterLeft[facei], pDeltaRLeft[facei] & pgradULeft[facei]),
-                            pURight[facei] + cmptMultiply(pULimiterRight[facei], pDdeltaRRight[facei] & pgradURight[facei]),
-                            pTLeft[facei] + pTLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradTLeft[facei]),
-                            pTRight[facei] + pTLimiterRight[facei] * (pDdeltaRRight[facei] & pgradTRight[facei]),
-                            pR[facei],
-                            pR[facei],
-                            pCv[facei],
-                            pCv[facei],
-                            pSf[facei],
-                            pMagSf[facei],
-                            buiEps_[facei]);
-                        // Flux::evaluateFlux(
-                        //     pRhoFlux[facei],
-                        //     pRhoUFlux[facei],
-                        //     pRhoEFlux[facei],
-                        //     ppLeft[facei] + (pDeltaRLeft[facei] & pgradPLeft[facei]),
-                        //     ppRight[facei] + (pDdeltaRRight[facei] & pgradPRight[facei]),
-                        //     pULeft[facei] + pDeltaRLeft[facei] & pgradULeft[facei],
-                        //     pURight[facei] + pDdeltaRRight[facei] & pgradURight[facei],
-                        //     pTLeft[facei] + (pDeltaRLeft[facei] & pgradTLeft[facei]),
-                        //     pTRight[facei] + (pDdeltaRRight[facei] & pgradTRight[facei]),
-                        //     pR[facei],
-                        //     pR[facei],
-                        //     pCv[facei],
-                        //     pCv[facei],
-                        //     pSf[facei],
-                        //     pMagSf[facei],
-                        //     // buiEps_[facei]);
-                        //     1.0);
-                    }
-                }
-                else
-                {
-                    forAll(pp, facei)
-                    {
-                        // Calculate fluxes
-                        Flux::evaluateFlux(
-                            pRhoFlux[facei],
-                            pRhoUFlux[facei],
-                            pRhoEFlux[facei],
-                            pp[facei],
-                            pp[facei],
-                            pU[facei],
-                            pU[facei],
-                            pT[facei],
-                            pT[facei],
-                            pR[facei],
-                            pR[facei],
-                            pCv[facei],
-                            pCv[facei],
-                            pSf[facei],
-                            pMagSf[facei],
-                            buiEps_[facei]);
-                        // 1.0);
-                    }
+                    Flux::evaluateFlux(
+                        pRhoFlux[facei],
+                        pRhoUFlux[facei],
+                        pRhoEFlux[facei],
+                        ppLeft[facei] + ppLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradPLeft[facei]),
+                        ppRight[facei] + ppLimiterRight[facei] * (pDdeltaRRight[facei] & pgradPRight[facei]),
+                        pULeft[facei] + cmptMultiply(pULimiterLeft[facei], pDeltaRLeft[facei] & pgradULeft[facei]),
+                        pURight[facei] + cmptMultiply(pULimiterRight[facei], pDdeltaRRight[facei] & pgradURight[facei]),
+                        pTLeft[facei] + pTLimiterLeft[facei] * (pDeltaRLeft[facei] & pgradTLeft[facei]),
+                        pTRight[facei] + pTLimiterRight[facei] * (pDdeltaRRight[facei] & pgradTRight[facei]),
+                        pR[facei],
+                        pR[facei],
+                        pCv[facei],
+                        pCv[facei],
+                        pSf[facei],
+                        pMagSf[facei],
+                        buiEps_[facei]);
                 }
             }
         }
-    };
+    }
+};
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
