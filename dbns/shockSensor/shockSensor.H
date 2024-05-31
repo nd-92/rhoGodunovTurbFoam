@@ -74,9 +74,11 @@ namespace Foam
                       IOobject::NO_READ,
                       IOobject::AUTO_WRITE),
                   mag(fvc::grad(thermo_.rho())) / rhoGradRef_),
-              USmall_(dimensionedScalar("USmall", dimLength / dimTime, SMALL))
+              USmall_(dimensionedScalar("USmall", dimLength / dimTime, SMALL)),
+              cellScales_(cellScalesI(mesh))
         {
-            shockSensor_ = erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_);
+            shockSensor_ = erf(erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_) + cellScales_);
+            shockSensor_ = shockSensor_ - min(shockSensor_);
             shockSensor_ = shockSensor_ / max(shockSensor_);
         };
 
@@ -86,7 +88,8 @@ namespace Foam
         // Update the shock sensor
         inline void update()
         {
-            shockSensor_ = erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_);
+            shockSensor_ = erf(erf(mag(fvc::grad(thermo_.rho()) & (U_ / (mag(U_) + USmall_))) / rhoGradRef_) + cellScales_);
+            shockSensor_ = shockSensor_ - min(shockSensor_);
             shockSensor_ = shockSensor_ / max(shockSensor_);
         }
 
@@ -117,6 +120,61 @@ namespace Foam
 
         // Small amount of velocity to help with direction vector
         const dimensionedScalar USmall_;
+
+        // Cell scales
+        const volScalarField cellScales_;
+
+        // Initialise the cell dimensions as a volScalarField
+        inline const volScalarField cellScalesI(const fvMesh &mesh) const
+        {
+            volScalarField cellScales_(
+                IOobject(
+                    "cellScales",
+                    mesh.time().timeName(),
+                    mesh,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE),
+                mesh,
+                dimensionedScalar("one", dimless, 1.0));
+            // cellScales_.primitiveFieldRef() = cbrt(this->mesh().V());
+            const cellList &cells = mesh.cells();
+            const vectorField &cellC = mesh.cellCentres();
+            const vectorField &faceC = mesh.faceCentres();
+            const vectorField faceN(mesh.faceAreas() / mag(mesh.faceAreas()));
+            scalarField hmax(cells.size());
+            forAll(cells, celli)
+            {
+                scalar deltaMaxTmp = 0.0;
+                const labelList &cFaces = cells[celli];
+                const point &cc = cellC[celli];
+
+                forAll(cFaces, cFacei)
+                {
+                    label facei = cFaces[cFacei];
+                    const point &fc = faceC[facei];
+                    const vector &n = faceN[facei];
+
+                    scalar tmp = mag(n & (fc - cc));
+                    if (tmp > deltaMaxTmp)
+                    {
+                        deltaMaxTmp = tmp;
+                    }
+                }
+
+                hmax[celli] = deltaMaxTmp;
+            }
+
+            cellScales_.primitiveFieldRef() = hmax;
+
+            const dimensionedScalar cellScaleRef_ = dimensionedScalar(
+                "cellScaleRef",
+                dimless,
+                readScalar(mesh.solutionDict().subDict("freestreamProperties").lookup("cellDim")));
+
+            cellScales_ = erf(cellScales_ / cellScaleRef_);
+
+            return cellScales_;
+        }
     };
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
