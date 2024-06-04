@@ -11,20 +11,26 @@ for (size_t i = 0; i < 4; i++)
     dbnsFlux.computeFlux();
 
     // Time integration
-    solve(                               //
-        1.0 / beta[i] * fvm::ddt(rho)    //
-        + fvc::div(dbnsFlux.rhoFlux())); //
+    solve                                  //
+        (                                  //
+            1.0 / beta[i] * fvm::ddt(rho)  //
+            + fvc::div(dbnsFlux.rhoFlux()) //
+        );                                 //
 
-    solve(                                     //
-        1.0 / beta[i] * fvm::ddt(rhoU)         //
-        + fvc::div(dbnsFlux.rhoUFlux())        //
-        + fvc::div(turbulence->devRhoReff())); //
+    solve                                        //
+        (                                        //
+            1.0 / beta[i] * fvm::ddt(rhoU)       //
+            + fvc::div(dbnsFlux.rhoUFlux())      //
+            + fvc::div(turbulence->devRhoReff()) //
+        );                                       //
 
-    solve(                                            //
-        1.0 / beta[i] * fvm::ddt(rhoE)                //
-        + fvc::div(dbnsFlux.rhoEFlux())               //
-        + fvc::div(turbulence->devRhoReff() & U)      //
-        - fvc::laplacian(turbulence->alphaEff(), e)); //
+    solve                                                        //
+        (                                                        //
+            1.0 / beta[i] * fvm::ddt(rhoE)                       //
+            + fvc::div(dbnsFlux.rhoEFlux())                      //
+            + fvc::div(turbulence->devRhoReff() & rhoU / rho)    //
+            - fvc::laplacian(turbulence->alphaEff(), rhoE / rho) //
+        );                                                       //
 
     // Compute U
     U = rhoU / rho;
