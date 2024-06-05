@@ -58,6 +58,9 @@ int main(int argc, char *argv[])
 #include "createFields.H"
 #include "createTimeControls.H"
 
+    // Validate turbulence
+    turbulence->validate();
+
     // Runge-Kutta coefficient
     constexpr const std::array<scalar, 4> beta = {0.1100, 0.2766, 0.5, 1};
 
